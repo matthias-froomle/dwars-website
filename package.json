@@ -12,6 +12,7 @@
     "theme:check": "npm --prefix drupal-theme/dwars2026 run check",
     "theme:verify-local": "node scripts/verify-theme-local.mjs",
     "theme:package": "npm --prefix drupal-theme/dwars2026 run package",
+    "theme:deploy:production": "bash scripts/deploy-theme-production.sh",
     "editions:package": "./scripts/package-editions.sh"
   },
   "dependencies": {

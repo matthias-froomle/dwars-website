@@ -13,6 +13,23 @@ import editorial content, editions, database configuration, or public files.
 
 ## Before the switch
 
+The guarded automated workflow is preferred for ordinary theme-only releases:
+
+```bash
+npm run theme:deploy:production -- --preflight
+npm run theme:deploy:production -- --confirm-production
+```
+
+It requires key-based SSH access, a clean `main` worktree exactly matching
+`origin/main`, the persistent Chromium debug session used by the browser sweep,
+and an incremented theme version. It automates the backup, checksum, staging,
+maintenance, atomic replacement, rollback, HTTP/browser, updater-readiness, and
+fresh-log checks described below. The explicit confirmation argument prevents
+an accidental plain `npm run` from changing production.
+
+The remaining steps document the same workflow for inspection and manual
+recovery.
+
 1. Verify the release locally:
 
    ```bash

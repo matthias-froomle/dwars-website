@@ -4,7 +4,7 @@
 the Next.js application in this repository. Production runs this native theme;
 it does not need Next.js, React, JSON:API, Node.js, or Vercel at runtime.
 
-The current theme release is `1.0.3`.
+The current theme release is `1.0.4`.
 
 ## Ownership boundary
 
@@ -110,6 +110,20 @@ mode with an EXIT cleanup trap, atomic replacement with rollback, cache rebuild,
 HTTP/browser smoke tests, Automatic Updates readiness as `www-data`, and recent
 Drupal-log inspection. `sites/default/files` is preserved and Claro remains the
 administration theme.
+
+The guarded repository command implements that workflow over key-based SSH:
+
+```bash
+npm run theme:deploy:production -- --preflight
+npm run theme:deploy:production -- --confirm-production
+```
+
+Preflight builds and packages the theme, requires a clean `main` commit equal to
+`origin/main`, and performs read-only production checks. The confirmed command
+then creates verified server-only database/code backups, stages and checksums
+the artifact, replaces the theme under maintenance mode, and automatically
+restores the previous directory if deployment or post-deploy HTTP/browser/log
+checks fail. It never stores SSH or Drupal credentials in the repository.
 
 Routine editorial changes require no build or deployment. A developer release
 is required for visual changes or changes to bundle, field, menu, View, route,

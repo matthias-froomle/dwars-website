@@ -1101,6 +1101,21 @@ a.bg-tape:focus-visible {
   height: auto;
 }
 
+.dwars-related-thumbnail .field,
+.dwars-related-thumbnail .field__item,
+.dwars-related-thumbnail a,
+.dwars-related-thumbnail picture,
+.dwars-related-thumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.dwars-related-thumbnail img {
+  object-fit: cover;
+  object-position: center;
+}
+
 .dwars-designed-content p {
   color: #374151;
   font-size: 1.125rem;
