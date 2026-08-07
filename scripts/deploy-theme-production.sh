@@ -206,6 +206,7 @@ dwars_release="$3"
 dwars_version="$4"
 dwars_stage="$dwars_release/unpacked/dwars2026"
 dwars_old="$dwars_backup/dwars2026-live-directory"
+dwars_candidate="themes/custom/.dwars2026-candidate-$dwars_version"
 cd "$dwars_root"
 
 dwars_cleanup() {
@@ -217,17 +218,23 @@ dwars_cleanup() {
     fi
     mv "$dwars_old" themes/custom/dwars2026
   fi
+  if [[ -d "$dwars_candidate" ]]; then
+    mv "$dwars_candidate" "$dwars_release/failed-candidate-dwars2026"
+  fi
   vendor/bin/drush state:set system.maintenance_mode 0 -y >/dev/null 2>&1 || true
   vendor/bin/drush cache:rebuild >/dev/null 2>&1 || true
   exit "$dwars_rc"
 }
 trap dwars_cleanup EXIT
 
+test ! -e "$dwars_candidate"
+cp -r "$dwars_stage" "$dwars_candidate"
+test "$(awk '/^version:/ { print $2; exit }' "$dwars_candidate/dwars2026.info.yml")" = "$dwars_version"
 vendor/bin/drush state:set system.maintenance_mode 1 -y
 vendor/bin/drush cache:rebuild
 test ! -e "$dwars_old"
 mv themes/custom/dwars2026 "$dwars_old"
-cp -r "$dwars_stage" themes/custom/dwars2026
+mv "$dwars_candidate" themes/custom/dwars2026
 test "$(awk '/^version:/ { print $2; exit }' themes/custom/dwars2026/dwars2026.info.yml)" = "$dwars_version"
 vendor/bin/drush cache:rebuild
 test "$(vendor/bin/drush config:get system.theme default --format=string)" = "dwars2026"
