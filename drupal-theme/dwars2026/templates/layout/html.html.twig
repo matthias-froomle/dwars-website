@@ -28,14 +28,16 @@
     <svg class="absolute h-0 w-0" aria-hidden="true" focusable="false">
       <defs>
         <filter id="dwars-category-pink" color-interpolation-filters="sRGB">
+          <feFlood class="dwars-category-pink-flood" result="palette-pink" />
+          <feComposite in="palette-pink" in2="SourceAlpha" operator="in" result="pink-paper" />
           <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -.2126 -.7152 -.0722 0 1" result="darkness" />
           <feComposite in="darkness" in2="SourceAlpha" operator="in" result="bounded-darkness" />
           <feComponentTransfer in="bounded-darkness" result="letter-mask">
             <feFuncA type="table" tableValues="0 0 .35 1" />
           </feComponentTransfer>
-          <feFlood class="dwars-category-pink-flood" result="palette-pink" />
-          <feComposite in="palette-pink" in2="letter-mask" operator="in" result="pink-letters" />
-          <feComposite in="pink-letters" in2="SourceGraphic" operator="over" />
+          <feFlood flood-color="#fff" result="palette-white" />
+          <feComposite in="palette-white" in2="letter-mask" operator="in" result="white-letters" />
+          <feComposite in="white-letters" in2="pink-paper" operator="over" />
         </filter>
       </defs>
     </svg>
