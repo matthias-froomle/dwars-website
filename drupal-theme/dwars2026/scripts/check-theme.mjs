@@ -65,6 +65,9 @@ for (const entityId of legacyEntityIds) {
 
 const info = readFileSync(join(themeRoot, 'dwars2026.info.yml'), 'utf8');
 if (!/^version:\s+\S+/m.test(info)) errors.push('Theme release version is missing.');
+if (!/^logo:\s+assets\/images\/dwarslogo_website\.png$/m.test(info)) {
+  errors.push('Theme info must declare the packaged DWARS logo.');
+}
 for (const dependency of ['block', 'node', 'search', 'system', 'taxonomy', 'views']) {
   if (!new RegExp(`^\\s+- drupal:${dependency}$`, 'm').test(info)) {
     errors.push(`Missing Drupal module dependency: ${dependency}`);
