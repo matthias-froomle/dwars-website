@@ -81,7 +81,8 @@ test -d themes/custom/dwars2026
 test -d sites/default/files
 test "$(vendor/bin/drush state:get system.maintenance_mode)" = "0"
 test "$(vendor/bin/drush config:get system.theme default --format=string)" = "dwars2026"
-test "$(vendor/bin/drush updatedb:status --format=json)" = "[]"
+dwars_updates="$(vendor/bin/drush updatedb:status --format=json)"
+test -z "$dwars_updates" || test "$dwars_updates" = "[]"
 test "$(stat -c '%U:%G %a' sites/default/settings.php)" = "dwars:www-data 444"
 
 dwars_available_kb="$(df -Pk "$dwars_backups" | awk 'NR == 2 { print $4 }')"
@@ -277,7 +278,8 @@ dwars_version="$2"
 dwars_error_cursor="$3"
 cd "$dwars_root"
 
-test "$(vendor/bin/drush updatedb:status --format=json)" = "[]"
+dwars_updates="$(vendor/bin/drush updatedb:status --format=json)"
+test -z "$dwars_updates" || test "$dwars_updates" = "[]"
 test "$(vendor/bin/drush state:get system.maintenance_mode)" = "0"
 test "$(vendor/bin/drush config:get system.theme default --format=string)" = "dwars2026"
 test "$(awk '/^version:/ { print $2; exit }' themes/custom/dwars2026/dwars2026.info.yml)" = "$dwars_version"
