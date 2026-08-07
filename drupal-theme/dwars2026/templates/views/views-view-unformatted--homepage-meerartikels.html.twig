@@ -1,0 +1,11 @@
+{% if rows %}
+  <div class="mt-0 columns-1 gap-6 md:columns-2 md:gap-8 xl:columns-3">
+    {% for row in rows %}<div{{ row.attributes.addClass('mb-8', 'break-inside-avoid') }}>{{ row.content }}</div>{% endfor %}
+  </div>
+  <div class="relative mb-12 mt-16 flex justify-center">
+    <a href="{{ path('view.alle_artikels.page_1') }}" class="group relative inline-block transition-transform duration-300 hover:-translate-y-1 hover:scale-[1.02]">
+      <span class="pointer-events-none absolute inset-0 -z-10 flex scale-[1.3] items-center justify-center opacity-90 dark:opacity-80"><img src="{{ dwars_asset_base }}/extra/tape-light.png" alt="" class="h-full min-w-[250px] object-contain drop-shadow-sm"></span>
+      <span class="relative inline-block px-8 py-2 font-heading text-3xl tracking-widest transition-colors group-hover:text-dwars-pink dark:text-white dark:group-hover:text-dwars-pink">meer lezen...</span>
+    </a>
+  </div>
+{% endif %}

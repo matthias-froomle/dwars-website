@@ -1,0 +1,6 @@
+<div{{ attributes.addClass('dwars-block') }}>
+  {{ title_prefix }}
+  {% if label %}<h2{{ title_attributes.addClass('mb-5', 'font-heading', 'text-3xl', 'uppercase', 'tracking-wide') }}>{{ label }}</h2>{% endif %}
+  {{ title_suffix }}
+  <div{{ content_attributes }}>{{ content }}</div>
+</div>

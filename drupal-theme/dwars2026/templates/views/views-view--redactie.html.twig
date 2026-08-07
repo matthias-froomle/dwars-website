@@ -1,0 +1,27 @@
+<div{{ attributes.addClass('relative', 'flex', 'h-full', 'w-full') }}>
+  <div class="mx-auto max-w-5xl flex-1 p-12 pr-6">
+    {% if dwars_redactie_title or dwars_redactie_actions %}
+      <section class="dwars-redactie-intro mb-16">
+        {% if dwars_redactie_title %}{% include '@dwars2026/components/section-header.html.twig' with { title: dwars_redactie_title } %}{% endif %}
+        {% if dwars_redactie_actions %}
+          <div class="flex flex-wrap gap-4">
+            {% for action in dwars_redactie_actions %}
+              <a href="{{ action.url }}" class="inline-block border-2 px-6 py-2 font-heading uppercase tracking-wide transition-colors hover:border-dwars-pink hover:bg-dwars-pink hover:text-white {{ loop.first ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black' : 'border-black bg-white text-black dark:border-white dark:bg-black dark:text-white' }}">{{ action.label }}</a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
+
+    <div class="space-y-16">
+      {% for group_title, members in dwars_redactie_groups %}
+        {% if members %}
+          <section>
+            <h2 class="mb-6 inline-block border-b-4 border-dwars-pink pb-1 font-heading text-4xl uppercase tracking-wide">{{ group_title }}</h2>
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">{% for member in members %}{{ member }}{% endfor %}</div>
+          </section>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+name: DWARS 2026
+type: theme
+description: 'Drupal-native implementation of the DWARS 2026 visual design.'
+package: DWARS
+core_version_requirement: ^11
+base theme: false
+generator: 'starterkit_theme:11.3.11'
+libraries:
+  - dwars2026/global
+regions:
+  branding: Branding
+  navigation: Navigation
+  navigation_collapsible: Collapsible navigation
+  header: Header
+  latest: Latest
+  content: Content
+  sidebar_first: First sidebar
+  footer: Footer
+  page_top: Page top
+  page_bottom: Page bottom

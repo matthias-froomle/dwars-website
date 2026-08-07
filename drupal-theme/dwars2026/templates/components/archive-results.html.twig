@@ -1,0 +1,52 @@
+<div class="flex h-full w-full flex-col lg:flex-row">
+  <div class="max-w-5xl flex-1 p-6 md:p-12 md:pr-6">
+    {% include '@dwars2026/components/section-header.html.twig' with { title: 'archief'|t } %}
+    <div class="dwars-archive-results mt-8 flex flex-col">
+      {% if dwars_archive_rows %}
+        {% for row in dwars_archive_rows %}{{ row }}{% endfor %}
+      {% else %}
+        <p class="py-8 text-gray-300 md:text-black dark:text-gray-300">{{ 'Geen artikels gevonden.'|t }}</p>
+      {% endif %}
+    </div>
+    {{ archive_pager }}
+  </div>
+  <aside class="w-full shrink-0 border-t-2 border-dashed border-white bg-transparent p-6 transition-colors md:border-gray-200 md:bg-[#fefefe] md:p-8 dark:border-gray-700 dark:bg-[#222] lg:w-[320px] lg:border-l-2 lg:border-t-0 lg:pl-6">
+    <div class="sticky top-8 space-y-10">
+      <form action="{{ path('search.view_node_search') }}" method="get">
+        <label for="dwars-archive-search" class="mb-4 block font-heading text-2xl lowercase tracking-wide text-white md:text-black dark:text-white">zoekterm</label>
+        <div class="relative flex items-center">
+          <input id="dwars-archive-search" name="keys" type="search" value="{{ dwars_archive_search }}" placeholder="{{ 'Zoeken?!'|t }}" class="w-full appearance-none rounded-full border border-white bg-transparent px-4 py-2 pr-10 font-heading text-sm tracking-widest text-white shadow-none transition-colors placeholder:text-white/70 focus:border-dwars-pink focus:outline-none md:border-black md:text-black md:placeholder:text-black/60 md:focus:border-dwars-pink dark:border-white dark:text-white dark:placeholder:text-white/70 dark:focus:border-dwars-pink">
+          <button type="submit" class="absolute right-3 flex h-4 w-4 items-center justify-center" aria-label="{{ 'Search'|t }}">
+            <img src="{{ dwars_asset_base }}/icons/icons_zoeken.png" alt="" class="h-3 w-3 object-contain brightness-0 md:invert-0 dark:invert">
+          </button>
+        </div>
+      </form>
+
+      {% if dwars_archive_tags %}
+        <div>
+          <h3 class="mb-4 font-heading text-2xl lowercase tracking-wide text-white md:text-black dark:text-white">tags</h3>
+          <div class="flex flex-col gap-2 text-sm font-bold">
+            {% for item in dwars_archive_tags|slice(0, 11) %}
+              {% set active = item.id in dwars_archive_active_terms %}
+              <a href="{{ dwars_archive_is_search ? item.search_url : item.url }}" class="group flex items-center gap-3"><span class="flex h-4 w-4 items-center justify-center rounded-sm border {{ active ? 'border-white bg-white text-black md:border-black md:bg-black md:text-white dark:border-white dark:bg-white dark:text-black' : 'border-white bg-transparent md:border-gray-400 md:bg-white dark:border-gray-400 dark:bg-gray-800' }}">{% if active %}<svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-width="3"/></svg>{% endif %}</span><span class="text-gray-200 transition-colors group-hover:text-dwars-pink md:text-black dark:text-white">{{ item.label }}</span></a>
+            {% endfor %}
+          </div>
+          {% if dwars_archive_tags|length > 11 %}<details class="mt-4"><summary class="cursor-pointer text-xs font-bold text-gray-300 underline transition-colors hover:text-dwars-pink md:text-black dark:text-white">toon meer...</summary><div class="mt-3 flex flex-col gap-2 text-sm font-bold">{% for item in dwars_archive_tags|slice(11) %}<a href="{{ dwars_archive_is_search ? item.search_url : item.url }}" class="group flex items-center gap-3"><span class="h-4 w-4 rounded-sm border border-white bg-transparent md:border-gray-400 md:bg-white dark:border-gray-400 dark:bg-gray-800"></span><span class="text-gray-200 transition-colors group-hover:text-dwars-pink md:text-black dark:text-white">{{ item.label }}</span></a>{% endfor %}</div></details>{% endif %}
+        </div>
+      {% endif %}
+
+      {% for group in [
+        { title: 'verschenen in editie', items: dwars_archive_editions, limit: 5, searchable: true },
+        { title: 'auteur', items: dwars_archive_authors, limit: 5, searchable: false }
+      ] %}
+        {% if group.items %}
+          <div>
+            <h3 class="mb-4 font-heading text-2xl lowercase tracking-wide text-white md:text-black dark:text-white">{{ group.title }}</h3>
+            <div class="flex flex-col gap-2 text-sm font-bold">{% for item in group.items|slice(0, group.limit) %}{% set active = group.searchable and item.id in dwars_archive_active_terms %}<a href="{{ dwars_archive_is_search and group.searchable ? item.search_url : item.url }}" class="group flex items-center gap-3"><span class="flex h-4 w-4 items-center justify-center rounded-sm border {{ active ? 'border-white bg-white text-black md:border-black md:bg-black md:text-white dark:border-white dark:bg-white dark:text-black' : 'border-white md:border-gray-400 dark:border-gray-400' }}">{% if active %}<svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-width="3"/></svg>{% endif %}</span><span class="text-gray-200 transition-colors group-hover:text-dwars-pink md:text-black dark:text-white">{{ item.label }}</span></a>{% endfor %}</div>
+            {% if group.items|length > group.limit %}<details class="mt-4"><summary class="cursor-pointer text-xs font-bold text-gray-300 underline transition-colors hover:text-dwars-pink md:text-black dark:text-white">toon meer...</summary><div class="mt-3 flex flex-col gap-2 text-sm font-bold">{% for item in group.items|slice(group.limit) %}<a href="{{ dwars_archive_is_search and group.searchable ? item.search_url : item.url }}" class="group flex items-center gap-3"><span class="h-4 w-4 rounded-sm border border-white md:border-gray-400 dark:border-gray-400"></span><span class="text-gray-200 transition-colors group-hover:text-dwars-pink md:text-black dark:text-white">{{ item.label }}</span></a>{% endfor %}</div></details>{% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </aside>
+</div>

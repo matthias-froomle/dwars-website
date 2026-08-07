@@ -1,0 +1,573 @@
+@import "tailwindcss";
+@source "../../templates/**/*.twig";
+@source "../js/**/*.js";
+
+@font-face {
+  font-family: "Veneer";
+  src: url("../../assets/fonts/Veneer Three.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/fonts/Inter-Latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("../../assets/fonts/Montserrat-Latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-dwars-bg: #f9f9f9;
+  --color-dwars-text: #111111;
+  --color-dwars-pink: #ff0055;
+  --color-dwars-black: #000000;
+  --color-dwars-gray: #e5e5e5;
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-heading: "Veneer", Impact, sans-serif;
+  --font-brother: Montserrat, Inter, Arial, sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: #fff;
+    --foreground: #111;
+    color-scheme: light;
+  }
+
+  :root.dark {
+    --background: #222;
+    --foreground: #f9f9f9;
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-width: 320px;
+    margin: 0;
+    overflow-x: hidden;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color .3s, color .3s;
+  }
+
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: 3px solid #ff0055;
+    outline-offset: 3px;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    background: #000;
+    color: #fff;
+  }
+}
+
+@media (min-width: 768px) {
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .dark body {
+    background: #222;
+    color: #f3f4f6;
+  }
+}
+
+@layer components {
+  .dwars-page-frame {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    flex: 1 1 0%;
+    flex-direction: column;
+    padding-bottom: 8rem;
+  }
+
+  .dwars-page-frame > main {
+    flex: 1 1 auto;
+  }
+
+  .dwars-full-height-main {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  .dwars-full-height-main > div {
+    display: flex;
+    flex: 1 1 0%;
+    flex-direction: column;
+  }
+
+  .dwars-prose {
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .dwars-prose > * + * {
+    margin-top: 1.15em;
+  }
+
+  .dwars-prose h2, .dwars-prose h3, .dwars-prose h4 {
+    margin-top: 1.7em;
+    font-family: var(--font-heading);
+    line-height: .95;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .dwars-prose h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); }
+  .dwars-prose h3 { font-size: clamp(1.45rem, 3vw, 2rem); }
+
+  .dwars-prose a {
+    color: #ff0055;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+
+  .dwars-prose blockquote {
+    border-left: 5px solid #ff0055;
+    padding-left: 1.25rem;
+    font-size: 1.25em;
+    font-style: italic;
+  }
+
+  .dwars-prose ul { list-style: disc; padding-left: 1.5rem; }
+  .dwars-prose ol { list-style: decimal; padding-left: 1.5rem; }
+
+  .dwars-form input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]),
+  .dwars-form textarea,
+  .dwars-form select,
+  main input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]),
+  main textarea,
+  main select {
+    width: 100%;
+    border: 2px solid currentColor;
+    border-radius: 0;
+    background: transparent;
+    padding: .7rem .8rem;
+  }
+
+  .dwars-form input[type="submit"], .dwars-form button,
+  main input[type="submit"], main .button {
+    cursor: pointer;
+    border: 0;
+    background: #ff0055;
+    color: #fff;
+    padding: .7rem 1.2rem;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .pager__items {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    margin-top: 3rem;
+  }
+
+  .pager__number-strip,
+  .pager__item--first,
+  .pager__item--previous,
+  .pager__item--next,
+  .pager__item--last {
+    background-image: url("../../assets/images/extra/tape-light.png");
+    background-position: center;
+    background-size: 100% 100%;
+    filter: drop-shadow(0 2px 2px rgb(0 0 0 / .2));
+  }
+
+  .pager__number-strip {
+    padding: .45rem 1rem;
+  }
+
+  .pager__pages {
+    display: flex;
+    align-items: center;
+    gap: .1rem;
+  }
+
+  .pager__item--page a {
+    display: grid;
+    min-width: 2.15rem;
+    height: 2.15rem;
+    place-items: center;
+    color: #111;
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    letter-spacing: .04em;
+    transition: color .2s ease, transform .2s ease;
+  }
+
+  .pager__item--page.is-active a {
+    clip-path: polygon(4% 4%, 95% 0, 100% 12%, 97% 88%, 91% 100%, 5% 96%, 0 84%, 3% 13%);
+    background: var(--color-dwars-pink);
+    color: #fff;
+  }
+
+  .pager__item--page:not(.is-active) a:hover,
+  .pager__item--page:not(.is-active) a:focus-visible {
+    color: var(--color-dwars-pink);
+    transform: translateY(-2px) rotate(-1deg);
+  }
+
+  .pager__item--ellipsis {
+    display: grid;
+    min-width: 1.5rem;
+    height: 2.15rem;
+    place-items: center;
+    color: #111;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+  }
+
+  .pager__item--first a,
+  .pager__item--previous a,
+  .pager__item--next a,
+  .pager__item--last a {
+    display: grid;
+    min-height: 3rem;
+    place-items: center;
+    padding: .55rem 1.1rem;
+    color: #111;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    transition: color .2s ease, transform .2s ease;
+  }
+
+  .pager__item--first a:hover,
+  .pager__item--first a:focus-visible,
+  .pager__item--previous a:hover,
+  .pager__item--previous a:focus-visible,
+  .pager__item--next a:hover,
+  .pager__item--next a:focus-visible,
+  .pager__item--last a:hover,
+  .pager__item--last a:focus-visible {
+    color: var(--color-dwars-pink);
+    transform: translateY(-2px) rotate(-1deg);
+  }
+
+  @media (max-width: 639px) {
+    .pager__items { gap: .4rem; }
+    .pager__item--first,
+    .pager__item--last,
+    .pager__item--ellipsis,
+    .pager__item--page:not(.is-active) { display: none; }
+    .pager__number-strip { padding-inline: .75rem; }
+    .pager__item--previous a,
+    .pager__item--next a { min-height: 2.75rem; padding-inline: .9rem; }
+  }
+
+  .messages {
+    margin: 1rem 0;
+    border-left: 6px solid #ff0055;
+    background: #f1f1f1;
+    color: #111;
+    padding: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .dwars-page-frame { padding-bottom: 11rem; }
+  }
+
+  @media (min-width: 1024px) {
+    .dwars-page-frame { padding-bottom: 14rem; }
+  }
+}
+
+@layer utilities {
+  .clip-torn-paper {
+    clip-path: polygon(0 0,100% 0,98% 5%,100% 10%,97% 15%,100% 20%,98% 25%,100% 30%,97% 35%,100% 40%,98% 45%,100% 50%,97% 55%,100% 60%,98% 65%,100% 70%,97% 75%,100% 80%,98% 85%,100% 90%,97% 95%,100% 100%,0 100%);
+  }
+
+  .scrollbar-hide { scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+.dwars-mobile-overlay[data-open="false"] {
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(3rem, -3rem) scale(.95);
+}
+
+/* Drupal core defines an unlayered `.hidden` utility which wins over
+ * Tailwind's layered responsive utilities. Keep this display contract outside
+ * Tailwind's layers so the desktop shell matches the prototype in Drupal. */
+.dwars-desktop-sidebar { display: none; }
+.dwars-article-aside { display: none; }
+
+@media (min-width: 768px) {
+  .dwars-desktop-sidebar { display: flex; }
+}
+
+@media (min-width: 1024px) {
+  .dwars-article-aside { display: block; }
+}
+
+.dwars-mobile-overlay[data-open="true"] {
+  pointer-events: auto;
+  opacity: 1;
+  transform: translate(0) scale(1);
+}
+
+[data-dwars-menu-toggle][aria-expanded="true"] .dwars-hamburger { display: none; }
+[data-dwars-menu-toggle][aria-expanded="false"] .dwars-close { display: none; }
+
+@media (max-width: 767px) {
+  body.dwars-menu-open { overflow: hidden; }
+  .toolbar-fixed .dwars-mobile-header { top: 39px; }
+  .toolbar-fixed.toolbar-tray-open .dwars-mobile-header { top: 79px; }
+}
+
+@keyframes logoSpin {
+  to { transform: rotate(720deg); }
+}
+
+.animate-logo-spin { animation: logoSpin 1.5s ease-in-out; }
+
+.dwars-hero-image .field,
+.dwars-hero-image .field__item,
+.dwars-hero-image a,
+.dwars-hero-image img,
+.dwars-card-image img,
+.dwars-article-image img {
+  width: 100%;
+}
+
+.dwars-hero-image .field,
+.dwars-hero-image .field__item,
+.dwars-hero-image a,
+.dwars-hero-image img {
+  height: 100%;
+}
+
+.dwars-hero-image img,
+.dwars-card-image img,
+.dwars-article-image img {
+  display: block;
+  object-fit: cover;
+}
+
+.dwars-card-image img { transition: transform .5s; }
+.group:hover .dwars-card-image img { transform: scale(1.025); }
+
+.dwars-category-label img {
+  transition: filter .2s ease;
+}
+
+.dwars-category-pink-flood {
+  flood-color: var(--color-dwars-pink);
+}
+
+.dwars-category-label:hover img,
+.dwars-category-label:focus-visible img {
+  filter: url("#dwars-category-pink");
+}
+
+.dwars-search-page .search-form + h2 { display: none; }
+
+.dwars-edition-cover .field,
+.dwars-edition-cover .field__item,
+.dwars-edition-cover a,
+.dwars-edition-cover img {
+  width: 100%;
+  height: 100%;
+}
+
+.dwars-edition-cover img {
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 3px rgb(0 0 0 / .2));
+  transition: filter .3s;
+}
+
+.group:hover .dwars-edition-cover img {
+  filter: drop-shadow(0 10px 8px rgb(0 0 0 / .3));
+}
+
+.dwars-redactie-photo,
+.dwars-redactie-photo .field,
+.dwars-redactie-photo .field__item,
+.dwars-redactie-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.dwars-redactie-photo img { object-fit: cover; }
+
+.dwars-archive-header h2 {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  line-height: 1;
+}
+
+.dwars-archive-header h2 {
+  font-size: clamp(2.25rem, 5vw, 4.5rem);
+}
+
+.dwars-avatar-placeholder {
+  background-image:
+    radial-gradient(circle at 20% 25%, rgb(255 0 85 / .28) 0 6%, transparent 7%),
+    linear-gradient(145deg, transparent 42%, rgb(17 17 17 / .18) 43% 48%, transparent 49%),
+    linear-gradient(25deg, #f0f0f0, #d4d4d4);
+  box-shadow: inset 0 0 0 8px #111;
+}
+
+.dwars-block .contextual { color: #111; }
+
+.bg-tape {
+  position: relative;
+  background: #f0f0f0;
+  box-shadow: 0 1px 3px rgb(0 0 0 / .1);
+}
+
+.dwars-article-prose h3 {
+  color: inherit;
+  font-family: var(--font-heading);
+  font-size: 1.875rem;
+  letter-spacing: .025em;
+  text-transform: uppercase;
+}
+
+.dwars-article-advertisements .view-content {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.dwars-article-advertisements article {
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+  background: #f8f8f8;
+  padding: 1rem;
+}
+
+.dark .dwars-article-advertisements article {
+  border-color: #374151;
+  background: #1f2937;
+}
+
+.dwars-article-advertisements img {
+  width: 100%;
+  height: auto;
+}
+
+.dwars-designed-content p {
+  color: #374151;
+  font-size: 1.125rem;
+  line-height: 1.625;
+  margin-bottom: 1rem;
+}
+
+.dwars-designed-content .text-align-justify { text-align: left; }
+
+.dark .dwars-designed-content p { color: #d1d5db; }
+.dwars-designed-content p:empty,
+.dwars-designed-content p:has(> br:only-child) { display: none; }
+
+.dwars-designed-content h2,
+.dwars-designed-content h3,
+.dwars-designed-content h4 {
+  font-family: var(--font-heading);
+  font-size: 2.25rem;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: .025em;
+  margin-bottom: 1rem;
+  margin-top: 2.5rem;
+  text-transform: uppercase;
+}
+
+.dwars-designed-content :is(h2, h3, h4) :is(strong, b) {
+  font-weight: inherit;
+}
+
+.dwars-designed-content h3:first-of-type { margin-top: 0; }
+
+.dwars-contact-general .dwars-contact-identity {
+  margin-bottom: .5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.dwars-contact-general .dwars-contact-identity em { font-style: normal; }
+.dwars-contact-general .dwars-contact-detail strong { font-weight: inherit; }
+
+.dwars-contact-general .dwars-contact-detail { margin-bottom: .25rem; }
+.dwars-contact-general .dwars-contact-detail:nth-of-type(3) { margin-bottom: 1.5rem; }
+.dwars-contact-general .dwars-contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.dwars-contact-general .dwars-contact-links p { margin-bottom: 0; }
+.dwars-designed-content .dwars-contact-heading { font-size: 1.875rem; }
+
+@media (min-width: 768px) {
+  .dwars-designed-content .dwars-contact-heading { font-size: 2.25rem; }
+}
+
+.dwars-designed-content a {
+  color: #ff0055;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dwars-designed-content table {
+  display: block;
+  width: 100% !important;
+  max-width: 100%;
+  border-collapse: collapse;
+  overflow-x: auto;
+  font-size: .95rem;
+}
+
+.dwars-designed-content th,
+.dwars-designed-content td {
+  min-width: 10rem;
+  border: 1px solid #9ca3af;
+  padding: .75rem !important;
+  vertical-align: top;
+}
+
+.dwars-designed-content th {
+  background: #111;
+  color: #fff;
+}
+
+.dark .dwars-designed-content td { border-color: #4b5563; }

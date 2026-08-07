@@ -1,0 +1,15 @@
+<div class="flex min-h-screen w-full flex-col md:flex-row">
+  {% include '@dwars2026/components/mobile-header.html.twig' %}
+  {% include '@dwars2026/components/sidebar.html.twig' %}
+
+  <div class="dwars-page-frame">
+    {% if page.navigation or page.navigation_collapsible or page.branding %}
+      <div class="sr-only" aria-hidden="true">{{ page.branding }}{{ page.navigation }}{{ page.navigation_collapsible }}</div>
+    {% endif %}
+    <main id="main-content" class="mx-auto w-full max-w-[1300px] px-4 py-8 md:px-8 lg:px-12" tabindex="-1">
+      {{ page.content }}
+    </main>
+
+    {% include '@dwars2026/components/copyright-corner.html.twig' %}
+  </div>
+</div>

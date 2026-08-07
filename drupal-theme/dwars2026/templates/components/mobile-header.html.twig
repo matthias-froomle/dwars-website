@@ -1,0 +1,38 @@
+<header class="dwars-mobile-header sticky top-0 z-50 flex w-full flex-col bg-black md:hidden">
+  <div class="relative flex items-center justify-between px-4 py-3">
+    <a href="{{ path('<front>') }}" class="relative h-[30px] w-[120px]" aria-label="{{ 'DWARS home'|t }}">
+      <img data-dwars-logo src="{{ dwars_asset_base }}/{{ dwars_is_krom ? 'krom_logo.png' : 'dwarslogo_website.png' }}" alt="{{ dwars_is_krom ? 'Krom' : 'DWARS' }}" class="h-full w-full object-contain object-left">
+    </a>
+    <button type="button" data-dwars-menu-toggle aria-controls="dwars-mobile-menu" aria-expanded="false" class="p-2 text-white" aria-label="{{ 'Open menu'|t }}">
+      <svg class="dwars-hamburger" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      <svg class="dwars-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <div class="relative z-10 -mt-px flex h-[25px] w-full items-center justify-center overflow-hidden bg-black" aria-hidden="true">
+    <img src="{{ dwars_asset_base }}/sidebar/scheur_zijbalk_transp.png" alt="" class="absolute min-h-[400vw] w-[35px] rotate-90 scale-x-[-1] object-fill">
+  </div>
+  <div class="relative w-full bg-black">
+    <div class="scrollbar-hide overflow-x-auto overflow-y-hidden whitespace-nowrap px-4 py-3 shadow-[0_5px_15px_rgba(0,0,0,.5)]">
+      {% include '@dwars2026/components/categories.html.twig' with { desktop_grid: false, include_column: true } %}
+    </div>
+    <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-black via-black/80 to-transparent"></div>
+  </div>
+
+  <div id="dwars-mobile-menu" data-open="false" class="dwars-mobile-overlay fixed inset-0 top-[60px] z-40 flex origin-top-right flex-col overflow-y-auto bg-black/95 p-6 pt-8 backdrop-blur-sm transition-all duration-500">
+    <form action="{{ dwars_search_url }}" method="get" class="relative mb-8 flex w-full items-center">
+      <label class="sr-only" for="dwars-search-mobile">{{ 'Search'|t }}</label>
+      <input id="dwars-search-mobile" name="keys" type="search" placeholder="Zoeken?!" class="w-full rounded-full border-2 border-white bg-transparent px-4 py-2 font-heading text-lg tracking-widest text-white placeholder:text-white/70 focus:border-dwars-pink focus:outline-none">
+      <button type="submit" class="absolute right-4 h-5 w-5" aria-label="{{ 'Search'|t }}"><img src="{{ dwars_asset_base }}/icons/icons_zoeken.png" alt="" class="h-full w-full brightness-0 invert"></button>
+    </form>
+    <nav class="mt-4 flex flex-col gap-6 font-brother" aria-label="{{ 'Mobile navigation'|t }}">
+      {% for item in dwars_navigation %}
+        <a href="{{ item.url }}" {{ item.krom ? 'data-dwars-krom' : '' }} class="flex items-center gap-4 uppercase tracking-wide text-white transition-colors hover:text-dwars-pink">
+          <img src="{{ dwars_asset_base }}/{{ item.icon }}" alt="" class="h-5 w-5 shrink-0 object-contain">
+          <span class="text-xl font-bold">{{ item.label }}</span>
+        </a>
+      {% endfor %}
+    </nav>
+    <div class="mt-8">{% include '@dwars2026/components/theme-toggle.html.twig' %}</div>
+  </div>
+</header>

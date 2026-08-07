@@ -1,0 +1,24 @@
+langcode: nl
+status: true
+dependencies:
+  config:
+    - system.menu.menu-dwars-hoofdmenu
+  module:
+    - system
+  theme:
+    - dwars2026
+id: dwars2026_dwarshoofdmenu
+theme: dwars2026
+region: navigation_collapsible
+weight: -21
+provider: null
+plugin: 'system_menu_block:menu-dwars-hoofdmenu'
+settings:
+  id: 'system_menu_block:menu-dwars-hoofdmenu'
+  label: 'DWARS hoofdmenu'
+  label_display: '0'
+  provider: system
+  level: 1
+  depth: 0
+  expand_all_items: false
+visibility: {  }

@@ -1,0 +1,7 @@
+<article{{ attributes.addClass('group', 'relative', 'mb-4', 'flex-1', 'border-b-2', 'border-black', 'pb-4', 'transition-all', 'dark:border-white') }}>
+  {% if dwars_section %}<span class="mb-2 block text-xs font-bold uppercase tracking-wider dark:text-gray-300">{{ dwars_section }}</span>{% endif %}
+  <a href="{{ url }}" class="block">
+    <h3{{ title_attributes.addClass('mb-2', 'font-heading', 'text-xl', 'uppercase', 'leading-tight', 'tracking-wide', 'transition-colors', 'group-hover:text-dwars-pink') }}>{{ label }}</h3>
+    {% if dwars_excerpt %}<p class="line-clamp-3 text-sm leading-relaxed text-black dark:text-gray-400">{{ dwars_excerpt }}</p>{% endif %}
+  </a>
+</article>

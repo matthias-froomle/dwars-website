@@ -1,0 +1,8 @@
+<article{{ attributes.addClass('break-inside-avoid', 'dwars-edition-card') }}>
+  <a href="{{ dwars_edition_pdf_url ?: url }}" class="group flex cursor-pointer flex-col items-center transition-transform duration-300 hover:-translate-y-1 hover:scale-105" target="_blank" rel="noopener noreferrer">
+    <div class="dwars-edition-cover relative mb-4 aspect-[4/3] w-full grayscale transition-all duration-300 group-hover:grayscale-0 dark:mix-blend-lighten">
+      {% if dwars_edition_cover_url %}<img src="{{ dwars_edition_cover_url }}" alt="{{ dwars_edition_label }}">{% endif %}
+    </div>
+    <h2 class="font-heading text-xl uppercase tracking-wider text-black transition-colors duration-300 group-hover:text-[#ff007f] dark:text-white">{{ dwars_edition_label }}</h2>
+  </a>
+</article>

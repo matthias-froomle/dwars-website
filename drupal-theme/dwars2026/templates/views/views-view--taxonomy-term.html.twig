@@ -1,0 +1,16 @@
+{% if dwars_is_krom_view %}
+  <div{{ attributes.addClass('relative', 'flex', 'min-h-full', 'w-full', 'flex-col', 'pb-48') }}>
+    <div class="mx-auto w-full max-w-[1600px] p-4 md:p-8 lg:p-12">
+      {% if dwars_krom_hero %}<div class="mb-0 flex flex-col gap-8 xl:flex-row"><div class="h-[420px] min-w-0 flex-none md:h-[520px] lg:h-[620px] xl:h-[550px] xl:flex-1">{{ dwars_krom_hero }}</div>{% if dwars_krom_sidebar_rows %}<div class="flex w-full shrink-0 flex-col gap-6 sm:flex-row xl:w-[200px] xl:flex-col">{% for row in dwars_krom_sidebar_rows %}{{ row }}{% endfor %}</div>{% endif %}</div>{% endif %}
+      <section class="mb-8 mt-4">
+        {% include '@dwars2026/components/section-header.html.twig' with { title: 'recente artikels' } %}
+        <div class="mt-0 w-full columns-1 gap-6 md:columns-2 md:gap-8 xl:columns-3">{% for row in dwars_krom_rows %}<div class="mb-8 break-inside-avoid">{{ row }}</div>{% endfor %}</div>
+        <div class="relative mb-12 mt-16 flex justify-center"><a href="{{ path('view.alle_artikels.page_1') }}" class="group relative inline-block transition-transform duration-300 hover:-translate-y-1 hover:scale-[1.02]"><span class="pointer-events-none absolute inset-0 -z-10 flex scale-[1.3] items-center justify-center opacity-90 dark:opacity-80"><img src="{{ dwars_asset_base }}/extra/tape-light.png" alt="" class="h-full min-w-[250px] object-contain drop-shadow-sm"></span><span class="relative inline-block px-8 py-2 font-heading text-3xl tracking-widest transition-colors group-hover:text-dwars-pink dark:text-white dark:group-hover:text-dwars-pink">meer lezen...</span></a></div>
+      </section>
+    </div>
+  </div>
+{% elseif dwars_is_archive_view %}
+  {% include '@dwars2026/components/archive-results.html.twig' with { archive_pager: dwars_archive_pager } %}
+{% else %}
+  <div{{ attributes.addClass('dwars-view') }}>{{ title_prefix }}{{ title }}{{ title_suffix }}{{ exposed }}{{ attachment_before }}{{ rows }}{{ empty }}{{ pager }}{{ attachment_after }}{{ more }}{{ feed_icons }}</div>
+{% endif %}

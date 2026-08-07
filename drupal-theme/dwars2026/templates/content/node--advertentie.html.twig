@@ -1,0 +1,4 @@
+<article{{ attributes.addClass('group', 'mb-6', 'border-b-2', 'border-current', 'pb-6') }}>
+  {% if not page %}<h2 class="mb-2 font-heading text-xl uppercase leading-tight tracking-wide transition-colors group-hover:text-dwars-pink"><a href="{{ url }}">{{ label }}</a></h2>{% endif %}
+  <div>{{ content }}</div>
+</article>

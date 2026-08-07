@@ -1,0 +1,15 @@
+{
+  "name": "dwars2026-theme",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tailwindcss -i ./src/css/main.css -o ./dist/css/main.css --minify",
+    "watch": "tailwindcss -i ./src/css/main.css -o ./dist/css/main.css --watch",
+    "check": "node ./scripts/check-theme.mjs",
+    "package": "npm run build && npm run check && node ./scripts/package-theme.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "tailwindcss": "^4.1.0"
+  }
+}

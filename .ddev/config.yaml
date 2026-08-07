@@ -1,0 +1,15 @@
+name: dwars-drupal
+type: drupal11
+docroot: .local-drupal
+php_version: "8.4"
+webserver_type: apache-fpm
+database:
+  type: mysql
+  version: "8.0"
+composer_root: .local-drupal
+performance_mode: none
+web_environment:
+  - DRUPAL_ENVIRONMENT=ddev
+upload_dirs:
+  - sites/default/files
+use_dns_when_possible: true

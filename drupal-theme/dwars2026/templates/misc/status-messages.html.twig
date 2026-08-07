@@ -1,0 +1,8 @@
+<div data-drupal-messages>
+  {% for type, messages in message_list %}
+    <div role="{{ type == 'error' ? 'alert' : 'status' }}" aria-label="{{ status_headings[type] }}" class="messages messages--{{ type }}">
+      {% if status_headings[type] %}<h2 class="mb-2 font-bold">{{ status_headings[type] }}</h2>{% endif %}
+      {% if messages|length > 1 %}<ul>{% for message in messages %}<li>{{ message }}</li>{% endfor %}</ul>{% else %}{{ messages|first }}{% endif %}
+    </div>
+  {% endfor %}
+</div>

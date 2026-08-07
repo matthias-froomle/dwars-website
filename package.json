@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "theme:install": "npm --prefix drupal-theme/dwars2026 install",
+    "theme:build": "npm --prefix drupal-theme/dwars2026 run build",
+    "theme:check": "npm --prefix drupal-theme/dwars2026 run check",
+    "theme:package": "npm --prefix drupal-theme/dwars2026 run package",
+    "editions:package": "./scripts/package-editions.sh"
   },
   "dependencies": {
     "next": "16.1.6",

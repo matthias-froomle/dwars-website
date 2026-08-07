@@ -1,0 +1,18 @@
+{% set visible_categories = include_column|default(true) ? dwars_categories : dwars_categories|slice(0, 9) %}
+{% if desktop_grid|default(false) %}
+  <div class="flex w-full flex-col gap-0.5">
+    {% for row in visible_categories|batch(3) %}
+      <div class="flex w-full flex-row items-center justify-center gap-0.5">
+        {% for item in row %}
+          <a href="{{ item.url }}" class="dwars-category-label {{ item.rotation }} inline-block h-6 drop-shadow-sm transition-transform hover:z-10 hover:scale-105 focus-visible:z-10 focus-visible:scale-105 focus-visible:outline-none lg:h-7"><img src="{{ dwars_asset_base }}/{{ item.image }}" alt="{{ item.label }}" class="h-full w-auto object-contain"></a>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="flex min-w-max items-center gap-2 pb-1 pr-8">
+    {% for item in visible_categories %}
+      <a href="{{ item.url }}" class="dwars-category-label {{ item.rotation }} inline-block h-[26px] drop-shadow-sm transition-transform hover:z-10 hover:scale-105 focus-visible:z-10 focus-visible:scale-105 focus-visible:outline-none sm:h-8"><img src="{{ dwars_asset_base }}/{{ item.image }}" alt="{{ item.label }}" class="h-full w-auto object-contain"></a>
+    {% endfor %}
+  </div>
+{% endif %}

@@ -1,0 +1,23 @@
+langcode: nl
+status: true
+dependencies:
+  config:
+    - views.view.advertenties
+  module:
+    - views
+  theme:
+    - dwars2026
+id: dwars2026_views_block__advertenties_block_1
+theme: dwars2026
+region: sidebar_first
+weight: -20
+provider: null
+plugin: 'views_block:advertenties-block_1'
+settings:
+  id: 'views_block:advertenties-block_1'
+  label: ''
+  label_display: '0'
+  provider: views
+  views_label: ''
+  items_per_page: none
+visibility: {  }

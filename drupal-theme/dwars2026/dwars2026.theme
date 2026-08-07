@@ -1,0 +1,736 @@
+<?php
+
+/**
+ * @file
+ * Theme hooks and preprocessing for the DWARS 2026 theme.
+ */
+
+use Drupal\Core\Url;
+use Drupal\Core\Menu\MenuTreeParameters;
+use Drupal\Core\Render\Markup;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_preprocess().
+ */
+function dwars2026_preprocess(array &$variables, string $hook): void {
+  $directory = \Drupal::service('extension.list.theme')->getPath('dwars2026');
+  $variables['dwars_asset_base'] = base_path() . $directory . '/assets/images';
+  $variables['dwars_current_year'] = (int) date('Y');
+  $variables['dwars_site_name'] = (string) \Drupal::config('system.site')->get('name');
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function dwars2026_preprocess_html(array &$variables): void {
+  $variables['html_attributes']->addClass('no-js');
+  if (\Drupal::routeMatch()->getRouteName() === 'search.view_node_search') {
+    $variables['html_attributes']->addClass('dwars-search-page');
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function dwars2026_preprocess_page(array &$variables): void {
+  $route_match = \Drupal::routeMatch();
+  $current_path = \Drupal::service('path.current')->getPath();
+  $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  $variables['dwars_is_krom'] = $current_path === '/taxonomy/term/4691';
+  $variables['dwars_search_url'] = Url::fromRoute('search.view_node_search', [], [
+    'language' => \Drupal::languageManager()->getCurrentLanguage(),
+  ])->toString();
+
+  $variables['dwars_navigation'] = _dwars2026_navigation();
+
+  $variables['dwars_categories'] = array_values(array_filter([
+    _dwars2026_category('tags/tags_unief.png', 4027, '-rotate-1'),
+    _dwars2026_category('tags/tags_maatschappij.png', 18, 'rotate-1'),
+    _dwars2026_category('tags/tags_cultuur.png', 6, '-rotate-2'),
+    _dwars2026_category('tags/tags_onderzoek.png', 4028, 'rotate-2'),
+    _dwars2026_category('tags/tags_t_stad.png', 7, '-rotate-1'),
+    _dwars2026_category('tags/tags_opinie.png', 4053, 'rotate-1'),
+    _dwars2026_category('tags/tags_satire.png', 4055, '-rotate-1'),
+    _dwars2026_category('tags/tags_editoriaal.png', 4026, 'rotate-2'),
+    _dwars2026_category('tags/tags_poezie.png', 4034, '-rotate-2'),
+    _dwars2026_category('tags/tags_column.png', 4032, 'rotate-1'),
+  ]));
+
+  // Make variables available to directly included component templates.
+  $variables['dwars_language'] = $language;
+  $variables['dwars_route_name'] = $route_match->getRouteName();
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function dwars2026_preprocess_node(array &$variables): void {
+  $node = $variables['node'];
+  if (!$node instanceof NodeInterface) {
+    return;
+  }
+
+  $variables['dwars_node_url'] = $node->toUrl()->toString();
+  $designed_pages = [
+    78874 => ['key' => 'over'],
+    78201 => ['key' => 'redacteur-worden'],
+    44 => ['key' => 'adverteren'],
+    78487 => ['key' => 'contact'],
+  ];
+  $variables['dwars_designed_page'] = $designed_pages[(int) $node->id()] ?? [];
+  if ($variables['dwars_designed_page']) {
+    $variables['dwars_designed_page']['title'] = $node->label();
+  }
+  $variables['dwars_designed_body'] = NULL;
+  $variables['dwars_contact'] = NULL;
+  if ($variables['dwars_designed_page'] && $node->hasField('body') && !$node->get('body')->isEmpty()) {
+    $body = (string) $node->get('body')->processed;
+    // Keep legacy editor styling from leaking outside the designed-page
+    // component. Drupal remains the source of the body content; the theme owns
+    // its presentation.
+    $body = preg_replace('/<style\b[^>]*>.*?<\/style>/is', '', $body) ?? $body;
+    $body = preg_replace('/\sstyle=("[^"]*"|\'[^\']*\')/is', '', $body) ?? $body;
+    $variables['dwars_designed_body'] = Markup::create($body);
+    if (($variables['dwars_designed_page']['key'] ?? '') === 'contact') {
+      $variables['dwars_contact'] = _dwars2026_contact_data($body);
+    }
+  }
+  $variables['dwars_published'] = \Drupal::service('date.formatter')->format(
+    $node->getCreatedTime(),
+    'custom',
+    'j F Y'
+  );
+  $variables['dwars_excerpt'] = _dwars2026_excerpt($node);
+  $variables['dwars_card_variant'] = (string) ($variables['elements']['#dwars_card_variant'] ?? '');
+  $variables['dwars_has_photo'] = FALSE;
+  $variables['dwars_article_image'] = NULL;
+  if ($node->hasField('field_artikelfoto') && !$node->get('field_artikelfoto')->isEmpty()) {
+    $photo = $node->get('field_artikelfoto')->entity;
+    if ($photo instanceof NodeInterface && $photo->hasField('field_fotozelf') && !$photo->get('field_fotozelf')->isEmpty()) {
+      $file = $photo->get('field_fotozelf')->entity;
+      if (_dwars2026_file_exists($file)) {
+        $variables['dwars_has_photo'] = TRUE;
+        $variables['dwars_article_image'] = $photo->get('field_fotozelf')->view(['label' => 'hidden', 'type' => 'image']);
+      }
+    }
+  }
+  $variables['dwars_author_external'] = _dwars2026_first_text($node, ['field_auteur_extern']);
+  $variables['dwars_roles'] = [];
+  if ($node->hasField('field_functie') && !$node->get('field_functie')->isEmpty()) {
+    foreach ($node->get('field_functie')->getValue() as $role) {
+      if (!empty($role['value'])) {
+        $variables['dwars_roles'][] = $role['value'];
+      }
+    }
+  }
+  $variables['dwars_primary_role'] = $variables['dwars_roles'][0] ?? '';
+  $variables['dwars_primary_role'] = preg_replace(
+    '/^(co-)?verantwoordelijke\s+/iu',
+    '',
+    $variables['dwars_primary_role']
+  ) ?? $variables['dwars_primary_role'];
+  $variables['dwars_has_portrait'] = $node->hasField('field_foto')
+    && !$node->get('field_foto')->isEmpty()
+    && _dwars2026_file_exists($node->get('field_foto')->entity);
+  $variables['dwars_initial'] = mb_strtoupper(mb_substr($node->label(), 0, 1));
+  $rotations = ['-rotate-1', 'rotate-1', '-rotate-2', 'rotate-2', 'rotate-0'];
+  $variables['dwars_card_rotation'] = $rotations[((int) $node->id()) % count($rotations)];
+  $edition_title = trim($node->label());
+  $variables['dwars_edition_number'] = '';
+  $variables['dwars_edition_label'] = $edition_title;
+  if (preg_match('/^(?:dwars\s+)?(\d+)\s*$/iu', $edition_title, $matches)) {
+    $variables['dwars_edition_number'] = $matches[1];
+    $variables['dwars_edition_label'] = 'Editie ' . $matches[1];
+  }
+  $variables['dwars_edition_pdf_url'] = '';
+  $variables['dwars_edition_cover_url'] = '';
+  if ($node->hasField('field_pdf') && !$node->get('field_pdf')->isEmpty()) {
+    $file = $node->get('field_pdf')->entity;
+    if ($file) {
+      $variables['dwars_edition_pdf_url'] = _dwars2026_file_url($file->getFileUri());
+    }
+  }
+  if ($node->hasField('field_voorpagina') && !$node->get('field_voorpagina')->isEmpty()) {
+    $file = $node->get('field_voorpagina')->entity;
+    if (_dwars2026_file_exists($file)) {
+      $variables['dwars_edition_cover_url'] = _dwars2026_file_url($file->getFileUri());
+    }
+  }
+  $variables['dwars_section'] = '';
+  if ($node->hasField('field_sectietag') && !$node->get('field_sectietag')->isEmpty()) {
+    $term = $node->get('field_sectietag')->entity;
+    $variables['dwars_section'] = $term ? $term->label() : '';
+  }
+  $variables['dwars_tape_tags'] = [];
+  $seen_tape_tags = [];
+  foreach (['field_sectietag', 'field_tags', 'field_dwarsnr'] as $field_name) {
+    if (!$node->hasField($field_name) || $node->get($field_name)->isEmpty()) {
+      continue;
+    }
+    foreach ($node->get($field_name)->referencedEntities() as $entity) {
+      if (method_exists($entity, 'toUrl')) {
+        $key = mb_strtolower(trim($entity->label()));
+        if (!isset($seen_tape_tags[$key])) {
+          $variables['dwars_tape_tags'][] = ['label' => $entity->label(), 'url' => $entity->toUrl()->toString()];
+          $seen_tape_tags[$key] = TRUE;
+        }
+      }
+    }
+  }
+  $variables['dwars_article_authors'] = [];
+  if ($node->hasField('field_auteur') && !$node->get('field_auteur')->isEmpty()) {
+    foreach ($node->get('field_auteur')->referencedEntities() as $author) {
+      $variables['dwars_article_authors'][] = ['label' => $author->label(), 'url' => $author->toUrl()->toString()];
+    }
+  }
+  $variables['dwars_related_articles'] = NULL;
+  $variables['dwars_article_ads'] = NULL;
+  if ($node->bundle() === 'artikel' && ($variables['view_mode'] ?? '') === 'full' && ($view = \Drupal\views\Views::getView('related_articles'))) {
+    $view->setDisplay('block_1');
+    $variables['dwars_related_articles'] = $view->render();
+  }
+  if ($node->bundle() === 'artikel' && ($variables['view_mode'] ?? '') === 'full' && ($view = \Drupal\views\Views::getView('advertenties'))) {
+    $view->setDisplay('block_1');
+    $view->execute();
+    if ($view->result) {
+      $variables['dwars_article_ads'] = $view->render();
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view().
+ */
+function dwars2026_preprocess_views_view(array &$variables): void {
+  $view = $variables['view'];
+  if ($view->id() === 'related_articles') {
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+    $variables['dwars_related_rows'] = [];
+    foreach (array_slice(_dwars2026_view_nodes($view->result), 0, 3) as $node) {
+      $variables['dwars_related_rows'][] = $view_builder->view($node, 'related');
+    }
+    return;
+  }
+  if ($view->id() === 'latest') {
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+    $nodes = _dwars2026_view_nodes($view->result);
+    $variables['dwars_home_hero'] = isset($nodes[0]) ? $view_builder->view($nodes[0], 'homepage_hero') : NULL;
+    $variables['dwars_home_sidebar_rows'] = [];
+    foreach (array_slice($nodes, 1, 2) as $node) {
+      $variables['dwars_home_sidebar_rows'][] = $view_builder->view($node, 'homepage_sidebar');
+    }
+    return;
+  }
+  if ($view->id() === 'homepage_meerartikels') {
+    // The restored View was limited to six records with an offset of eight.
+    // Re-run the same Drupal-owned filters and sorting for the 13-card visual
+    // composition in the prototype, then omit articles already used above.
+    $latest_ids = [];
+    if ($latest_view = \Drupal\views\Views::getView('latest')) {
+      $latest_view->setDisplay('block_1');
+      $latest_view->execute();
+      foreach (_dwars2026_view_nodes($latest_view->result) as $node) {
+        $latest_ids[(int) $node->id()] = TRUE;
+      }
+    }
+
+    $recent_nodes = [];
+    if ($recent_view = \Drupal\views\Views::getView('homepage_meerartikels')) {
+      $recent_view->setDisplay('block_1');
+      $recent_view->setOffset(0);
+      $recent_view->setItemsPerPage(16);
+      $recent_view->execute();
+      foreach (_dwars2026_view_nodes($recent_view->result) as $node) {
+        if (!isset($latest_ids[(int) $node->id()])) {
+          $recent_nodes[] = $node;
+        }
+        if (count($recent_nodes) === 13) {
+          break;
+        }
+      }
+    }
+
+    // These variants reproduce the prototype's image/text rhythm. They only
+    // select a Drupal teaser presentation; no editorial value lives here.
+    $card_variants = [
+      'text', 'image', 'image', 'text', 'text', 'text', 'image',
+      'text', 'image', 'image', 'text', 'text', 'text',
+    ];
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+    $variables['dwars_home_recent_rows'] = [];
+    foreach ($recent_nodes as $index => $node) {
+      $card = $view_builder->view($node, 'teaser');
+      $card['#dwars_card_variant'] = $card_variants[$index] ?? 'text';
+      $variables['dwars_home_recent_rows'][] = $card;
+    }
+    return;
+  }
+  if ($view->id() === 'taxonomy_term') {
+    $term = \Drupal::routeMatch()->getParameter('taxonomy_term');
+    if ($term && (int) $term->id() === 4691) {
+      $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+      $nodes = [];
+      foreach ($view->result as $result) {
+        $article = $result->_entity ?? NULL;
+        if ($article instanceof NodeInterface) {
+          $nodes[] = $article;
+        }
+      }
+      $variables['dwars_is_krom_view'] = TRUE;
+      $variables['dwars_krom_hero'] = isset($nodes[0]) ? $view_builder->view($nodes[0], 'overlapping_teaser') : NULL;
+      $variables['dwars_krom_sidebar_rows'] = [];
+      foreach (array_slice($nodes, 1, 2) as $node) {
+        $variables['dwars_krom_sidebar_rows'][] = $view_builder->view($node, 'krom_sidebar');
+      }
+      $variables['dwars_krom_rows'] = [];
+      foreach (array_slice($nodes, 3, 11) as $node) {
+        $variables['dwars_krom_rows'][] = $view_builder->view($node, 'teaser');
+      }
+      return;
+    }
+    $nodes = _dwars2026_view_nodes($view->result);
+    $pager = \Drupal::service('pager.manager')->createPager(count($nodes), 10, 0);
+    $page_nodes = array_slice($nodes, $pager->getCurrentPage() * 10, 10);
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+    $variables['dwars_is_archive_view'] = TRUE;
+    $variables['dwars_archive_rows'] = [];
+    foreach ($page_nodes as $node) {
+      $variables['dwars_archive_rows'][] = $view_builder->view($node, 'archive_row');
+    }
+    $variables += _dwars2026_archive_data($nodes);
+    $variables['dwars_archive_pager'] = ['#type' => 'pager', '#element' => 0];
+    $variables['dwars_archive_search'] = '';
+    $variables['dwars_archive_active_terms'] = $term ? [(int) $term->id()] : [];
+    $variables['dwars_archive_is_search'] = FALSE;
+    return;
+  }
+  if ($view->id() === 'alle_artikels') {
+    $variables['dwars_archive_rows'] = [];
+    $variables['dwars_archive_search'] = trim((string) \Drupal::request()->query->get('keys', ''));
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+    $nodes = _dwars2026_view_nodes($view->result);
+    foreach ($nodes as $node) {
+      $variables['dwars_archive_rows'][] = $view_builder->view($node, 'archive_row');
+    }
+    $variables += _dwars2026_archive_data($nodes);
+    $variables['dwars_archive_active_terms'] = [];
+    $variables['dwars_archive_is_search'] = FALSE;
+    return;
+  }
+  if ($view->id() !== 'redactie') {
+    return;
+  }
+
+  $variables['dwars_redactie_title'] = '';
+  $variables['dwars_redactie_actions'] = [];
+  foreach ($view->display_handler->getOption('header') ?? [] as $header_option) {
+    $header_content = is_array($header_option) ? ($header_option['content'] ?? '') : '';
+    $header_html = is_array($header_content) ? (string) ($header_content['value'] ?? '') : (string) $header_content;
+    if ($header_html === '') {
+      continue;
+    }
+    if ($variables['dwars_redactie_title'] === '' && preg_match('/<h[1-6]\b[^>]*>(.*?)<\/h[1-6]>/is', $header_html, $heading_match)) {
+      $variables['dwars_redactie_title'] = trim(html_entity_decode(strip_tags($heading_match[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+    if (preg_match_all('/<a\b[^>]*href=(?:"([^"]*)"|\'([^\']*)\')[^>]*>(.*?)<\/a>/is', $header_html, $link_matches, PREG_SET_ORDER)) {
+      foreach ($link_matches as $link_match) {
+        $variables['dwars_redactie_actions'][] = [
+          'url' => html_entity_decode($link_match[1] !== '' ? $link_match[1] : $link_match[2], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+          'label' => trim(html_entity_decode(strip_tags($link_match[3]), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+        ];
+      }
+    }
+  }
+
+  $groups = [
+    'Hoofdredactie' => [],
+    'Redactie' => [],
+  ];
+  $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+  foreach ($view->result as $result) {
+    $node = $result->_entity ?? NULL;
+    if (!$node instanceof NodeInterface) {
+      continue;
+    }
+    $roles = [];
+    if ($node->hasField('field_functie')) {
+      foreach ($node->get('field_functie')->getValue() as $role) {
+        if (!empty($role['value'])) {
+          $roles[] = $role['value'];
+        }
+      }
+    }
+    $is_editor_in_chief = (bool) array_filter($roles, static fn(string $role): bool => str_contains(mb_strtolower($role), 'hoofdredacteur'));
+    $groups[$is_editor_in_chief ? 'Hoofdredactie' : 'Redactie'][] = $view_builder->view($node, 'teaser');
+  }
+  $variables['dwars_redactie_groups'] = $groups;
+}
+
+/**
+ * Implements hook_preprocess_search_result().
+ */
+function dwars2026_preprocess_search_result(array &$variables): void {
+  $node = $variables['result']['node'] ?? NULL;
+  if ($node instanceof NodeInterface) {
+    $variables['dwars_search_row'] = \Drupal::entityTypeManager()
+      ->getViewBuilder('node')
+      ->view($node, 'archive_row');
+  }
+}
+
+/**
+ * Implements hook_preprocess_item_list().
+ */
+function dwars2026_preprocess_item_list(array &$variables): void {
+  if (($variables['context']['plugin'] ?? '') !== 'node_search') {
+    return;
+  }
+  $nodes = [];
+  $rows = [];
+  foreach ($variables['items'] as $item) {
+    $value = $item['value'] ?? $item;
+    $node = $value['#result']['node'] ?? NULL;
+    if ($node instanceof NodeInterface) {
+      $nodes[] = $node;
+    }
+    $rows[] = $value;
+  }
+  $variables['dwars_archive_rows'] = $rows;
+  $variables += _dwars2026_archive_data($nodes);
+  $variables['dwars_archive_search'] = trim((string) \Drupal::request()->query->get('keys', ''));
+  $variables['dwars_archive_active_terms'] = [];
+  foreach ((array) \Drupal::request()->query->all('f') as $filter) {
+    if (preg_match('/^term:(\d+)$/', (string) $filter, $matches)) {
+      $variables['dwars_archive_active_terms'][] = (int) $matches[1];
+    }
+  }
+  $variables['dwars_archive_is_search'] = TRUE;
+}
+
+/**
+ * Implements hook_preprocess_form().
+ */
+function dwars2026_preprocess_form(array &$variables): void {
+  if (\Drupal::routeMatch()->getRouteName() === 'search.view_node_search' && ($variables['element']['#form_id'] ?? '') === 'search_form') {
+    if ($variables['attributes'] instanceof \Drupal\Core\Template\Attribute) {
+      $variables['attributes']->addClass('hidden');
+    }
+    else {
+      $variables['attributes']['class'][] = 'hidden';
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_page_alter().
+ */
+function dwars2026_theme_suggestions_page_alter(array &$suggestions, array $variables): void {
+  $route = \Drupal::routeMatch()->getRouteName();
+  if ($route === 'view.redactie.page_1') {
+    $suggestions[] = 'page__redactie';
+  }
+  if ($route === 'view.archive.page_1') {
+    $suggestions[] = 'page__archive';
+  }
+  if ($route === 'view.alle_artikels.page_1') {
+    $suggestions[] = 'page__article_archive';
+  }
+  if ($route === 'search.view_node_search') {
+    $suggestions[] = 'page__article_archive';
+  }
+  if ($route === 'entity.taxonomy_term.canonical') {
+    $term = \Drupal::routeMatch()->getParameter('taxonomy_term');
+    if ($term && (int) $term->id() === 4691) {
+      $suggestions[] = 'page__krom';
+    }
+    else {
+      $suggestions[] = 'page__article_archive';
+    }
+  }
+  if ($route === 'entity.node.canonical') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node instanceof NodeInterface && in_array((int) $node->id(), [44, 78201, 78487, 78874], TRUE)) {
+      $suggestions[] = 'page__designed_static';
+    }
+    if ($node instanceof NodeInterface && in_array($node->bundle(), ['artikel', 'redactielid'], TRUE)) {
+      $suggestions[] = 'page__content_full';
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_node_alter().
+ */
+function dwars2026_theme_suggestions_node_alter(array &$suggestions, array $variables): void {
+  $node = $variables['elements']['#node'] ?? NULL;
+  if ($node instanceof NodeInterface && !empty($variables['elements']['#view_mode']) && $variables['elements']['#view_mode'] === 'full') {
+    if (in_array((int) $node->id(), [44, 78201, 78487, 78874], TRUE)) {
+      $suggestions[] = 'node__designed_static';
+    }
+  }
+}
+
+/**
+ * Loads the primary navigation labels, order, and destinations from Drupal.
+ */
+function _dwars2026_navigation(): array {
+  $parameters = (new MenuTreeParameters())
+    ->setMaxDepth(1)
+    ->onlyEnabledLinks();
+  $tree = \Drupal::menuTree()->load('menu-dwars-topmenu', $parameters);
+  $items = [];
+
+  foreach ($tree as $element) {
+    $link = $element->link;
+    $url = $link->getUrlObject();
+    $route = $url->isRouted() ? $url->getRouteName() : '';
+    $route_parameters = $url->isRouted() ? $url->getRouteParameters() : [];
+
+    // Search has its own control in the theme header.
+    if ($route === 'search.view_node_search') {
+      continue;
+    }
+
+    $icon = match ($route) {
+      'view.archive.page_1' => 'icons/icons_edities.png',
+      'view.redactie.page_1' => 'icons/icons_redactie.png',
+      'entity.node.canonical' => match ((int) ($route_parameters['node'] ?? 0)) {
+        78874 => 'icons/icons_over.png',
+        78201 => 'icons/icons_redacteur_worden.png',
+        44 => 'icons/icons_adverteren.png',
+        78487 => 'icons/icons_contact.png',
+        default => 'icons/icons_over.png',
+      },
+      default => 'icons/icons_over.png',
+    };
+
+    $items[] = [
+      'label' => $link->getTitle(),
+      'icon' => $icon,
+      'url' => $url->toString(),
+      'krom' => FALSE,
+    ];
+  }
+
+  // Krom is a taxonomy landing page rather than a menu item in the restored
+  // site. Its visible label and URL still come from the Drupal entity.
+  $krom = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load(4691);
+  if ($krom) {
+    $items[] = [
+      'label' => $krom->label(),
+      'icon' => 'icons/icons_krom.png',
+      'url' => $krom->toUrl()->toString(),
+      'krom' => TRUE,
+    ];
+  }
+
+  return $items;
+}
+
+/**
+ * Builds a category entry for the mobile and desktop category navigation.
+ */
+function _dwars2026_category(string $image, int $tid, string $rotation): ?array {
+  $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tid);
+  if (!$term) {
+    return NULL;
+  }
+
+  return [
+    'label' => $term->label(),
+    'image' => $image,
+    'url' => $term->toUrl()->toString(),
+    'rotation' => $rotation,
+  ];
+}
+
+/**
+ * Maps the legacy contact body into the reference composition without owning
+ * any of its editorial values.
+ */
+function _dwars2026_contact_data(string $body): ?array {
+  $parts = preg_split(
+    '/(<h[2-4]\b[^>]*>.*?<\/h[2-4]>)/is',
+    $body,
+    3,
+    PREG_SPLIT_DELIM_CAPTURE
+  );
+  if (!$parts || count($parts) < 3) {
+    return NULL;
+  }
+
+  $heading = trim(html_entity_decode(strip_tags($parts[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+  if ($heading === '') {
+    return NULL;
+  }
+
+  preg_match_all('/<p\b[^>]*>(.*?)<\/p>/is', $parts[0], $general_matches);
+  $general_lines = [];
+  foreach ($general_matches[1] ?? [] as $line) {
+    $plain = html_entity_decode(strip_tags($line), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $plain = trim(preg_replace('/[\s\x{00a0}]+/u', ' ', $plain) ?? $plain);
+    if ($plain !== '') {
+      $general_lines[] = Markup::create($line);
+    }
+  }
+
+  preg_match_all('/<p\b[^>]*>(.*?)<\/p>/is', $parts[2], $paragraph_matches);
+  $paragraphs = [];
+  foreach ($paragraph_matches[1] ?? [] as $paragraph) {
+    $plain = html_entity_decode(strip_tags($paragraph), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $plain = trim(preg_replace('/[\s\x{00a0}]+/u', ' ', $plain) ?? $plain);
+    if ($plain !== '') {
+      $paragraphs[] = ['html' => $paragraph, 'plain' => $plain];
+    }
+  }
+  if (!$paragraphs) {
+    return NULL;
+  }
+
+  $introduction = array_shift($paragraphs);
+  $people = [];
+  foreach ($paragraphs as $paragraph) {
+    if (!preg_match('/<(?:strong|b)\b[^>]*>(.*?)<\/(?:strong|b)>(.*)/is', $paragraph['html'], $matches)) {
+      continue;
+    }
+    $name = trim(html_entity_decode(strip_tags($matches[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    $role = html_entity_decode(strip_tags($matches[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $role = trim(preg_replace('/^[\s\x{00a0},:;-]+|[\s\x{00a0}]+$/u', '', $role) ?? $role);
+    if ($name !== '') {
+      $people[] = [
+        'name' => $name,
+        'role' => $role,
+        'initial' => mb_strtoupper(mb_substr($name, 0, 1)),
+      ];
+    }
+  }
+
+  return [
+    'general' => Markup::create($parts[0]),
+    'general_lines' => $general_lines,
+    'heading' => $heading,
+    'introduction' => Markup::create($introduction['html']),
+    'people' => $people,
+  ];
+}
+
+/**
+ * Checks that a referenced managed file is present in the active filesystem.
+ */
+function _dwars2026_file_exists(mixed $file): bool {
+  if (!$file || !method_exists($file, 'getFileUri')) {
+    return FALSE;
+  }
+
+  $path = \Drupal::service('file_system')->realpath($file->getFileUri());
+  return is_string($path) && is_file($path);
+}
+
+/**
+ * Returns the first populated plain-text field from a node.
+ */
+function _dwars2026_first_text(NodeInterface $node, array $field_names): string {
+  foreach ($field_names as $field_name) {
+    if ($node->hasField($field_name) && !$node->get($field_name)->isEmpty()) {
+      return trim(strip_tags((string) $node->get($field_name)->value));
+    }
+  }
+  return '';
+}
+
+/**
+ * Returns a concise CMS-owned article excerpt for compact card layouts.
+ */
+function _dwars2026_excerpt(NodeInterface $node): string {
+  $excerpt = _dwars2026_first_text($node, ['field_inleiding', 'field_ondertitel']);
+  if ($excerpt === '' && $node->hasField('body') && !$node->get('body')->isEmpty()) {
+    $body = $node->get('body')->first();
+    $excerpt = trim(strip_tags((string) ($body->summary ?: $body->value)));
+  }
+  $excerpt = html_entity_decode($excerpt, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+  $excerpt = preg_replace('/\s+/u', ' ', $excerpt) ?? $excerpt;
+  if (mb_strlen($excerpt) > 360) {
+    $excerpt = rtrim(mb_substr($excerpt, 0, 357));
+    $last_space = mb_strrpos($excerpt, ' ');
+    if ($last_space !== FALSE) {
+      $excerpt = mb_substr($excerpt, 0, $last_space);
+    }
+    $excerpt .= '...';
+  }
+  return $excerpt;
+}
+
+/**
+ * Extracts node entities from a View result without changing its selection.
+ *
+ * @return \Drupal\node\NodeInterface[]
+ *   Nodes in the order returned by the View.
+ */
+function _dwars2026_view_nodes(array $results): array {
+  $nodes = [];
+  foreach ($results as $result) {
+    $node = $result->_entity ?? NULL;
+    if ($node instanceof NodeInterface) {
+      $nodes[] = $node;
+    }
+  }
+  return $nodes;
+}
+
+/**
+ * Collects archive sidebar values from the nodes selected by Drupal.
+ */
+function _dwars2026_archive_data(array $nodes): array {
+  $groups = [
+    'dwars_archive_tags' => [],
+    'dwars_archive_editions' => [],
+    'dwars_archive_authors' => [],
+  ];
+  $field_groups = [
+    'dwars_archive_tags' => ['field_sectietag', 'field_tags'],
+    'dwars_archive_editions' => ['field_dwarsnr'],
+    'dwars_archive_authors' => ['field_auteur'],
+  ];
+  foreach ($nodes as $node) {
+    if (!$node instanceof NodeInterface) {
+      continue;
+    }
+    foreach ($field_groups as $group => $field_names) {
+      foreach ($field_names as $field_name) {
+        if (!$node->hasField($field_name) || $node->get($field_name)->isEmpty()) {
+          continue;
+        }
+        foreach ($node->get($field_name)->referencedEntities() as $entity) {
+          if (!method_exists($entity, 'toUrl')) {
+            continue;
+          }
+          $key = mb_strtolower(trim($entity->label()));
+          $id = (int) $entity->id();
+          $groups[$group][$key] ??= [
+            'id' => $id,
+            'label' => $entity->label(),
+            'url' => $entity->toUrl()->toString(),
+            'search_url' => Url::fromRoute('search.view_node_search', [], [
+              'query' => [
+                'keys' => trim((string) \Drupal::request()->query->get('keys', '')),
+                'f' => ['term:' . $id],
+              ],
+            ])->toString(),
+          ];
+        }
+      }
+    }
+  }
+  return array_map('array_values', $groups);
+}
+
+/** Resolves restored assets remotely, but newly imported assets locally. */
+function _dwars2026_file_url(string $uri): string {
+  $file_system = \Drupal::service('file_system');
+  $local_path = $file_system->realpath($uri);
+  if ($local_path && is_file($local_path) && str_starts_with($uri, 'public://')) {
+    return base_path() . 'sites/default/files/' . ltrim(substr($uri, strlen('public://')), '/');
+  }
+  return \Drupal::service('file_url_generator')->generateAbsoluteString($uri);
+}

@@ -1,0 +1,53 @@
+<article{{ attributes.addClass('relative', 'flex', 'min-h-full', 'w-full', 'flex-1', 'flex-col', 'pb-48', 'dwars-page-' ~ dwars_designed_page.key) }}>
+  <div class="mx-auto w-full max-w-[900px] p-6 md:p-12">
+    {% include '@dwars2026/components/section-header.html.twig' with { title: dwars_designed_page.title } %}
+    <div{{ content_attributes.addClass('dwars-designed-content', 'dwars-designed-content--' ~ dwars_designed_page.key, 'mt-12') }}>
+      {% if dwars_designed_page.key == 'contact' and dwars_contact %}
+        <section class="dwars-contact-general border-2 border-white bg-dwars-gray/10 p-8 transition-colors md:border-black dark:border-gray-500 dark:bg-gray-800">
+          {% if dwars_contact.general_lines %}
+            {% for line in dwars_contact.general_lines|slice(0, 3) %}
+              {% if loop.first %}
+                <p class="dwars-contact-identity">{{ line }}</p>
+              {% else %}
+                <p class="dwars-contact-detail">{{ line }}</p>
+              {% endif %}
+            {% endfor %}
+            {% if dwars_contact.general_lines|length > 3 %}
+              <div class="dwars-contact-links">
+                {% for line in dwars_contact.general_lines|slice(3) %}<p>{{ line }}</p>{% endfor %}
+              </div>
+            {% endif %}
+          {% else %}
+            {{ dwars_contact.general }}
+          {% endif %}
+        </section>
+        <section class="mt-10">
+          <h2 class="dwars-contact-heading">{{ dwars_contact.heading }}</h2>
+          <div class="dwars-contact-introduction mb-6 text-lg leading-relaxed">{{ dwars_contact.introduction }}</div>
+          {% if dwars_contact.people %}
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+              {% for person in dwars_contact.people %}
+                <div class="flex flex-col items-center border border-gray-300 p-6 text-center transition-colors md:border-black dark:border-gray-700">
+                  <div class="mb-4 h-24 w-24 overflow-hidden rounded-full border-2 border-dwars-pink bg-gray-200">
+                    <svg class="h-full w-full" viewBox="0 0 100 100" aria-hidden="true">
+                      <rect width="100" height="100" fill="#e0e0e0"/>
+                      <polygon points="0,0 58,0 35,38" fill="#111"/>
+                      <circle cx="78" cy="35" r="31" fill="#ff0055"/>
+                      <rect x="8" y="48" width="55" height="20" fill="#111" transform="rotate(-18 8 48)"/>
+                      <path d="M60 67 L86 91 M86 67 L60 91" stroke="#ff0055" stroke-width="6"/>
+                      <text x="48" y="63" font-family="sans-serif" font-size="42" font-weight="900" fill="#ff0055" text-anchor="middle" opacity=".3" transform="rotate(-15 48 62)">{{ person.initial }}</text>
+                    </svg>
+                  </div>
+                  <h3 class="mt-0 text-2xl">{{ person.name }}</h3>
+                  {% if person.role %}<span class="text-sm font-bold uppercase tracking-widest text-gray-400 md:text-gray-500">{{ person.role }}</span>{% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </section>
+      {% else %}
+        {{ dwars_designed_body }}
+      {% endif %}
+    </div>
+  </div>
+</article>

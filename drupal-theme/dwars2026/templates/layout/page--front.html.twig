@@ -1,0 +1,16 @@
+<div class="flex min-h-screen w-full flex-col md:flex-row">
+  {% include '@dwars2026/components/mobile-header.html.twig' %}
+  {% include '@dwars2026/components/sidebar.html.twig' %}
+
+  <div class="dwars-page-frame">
+    <main id="main-content" class="mx-auto w-full max-w-[1300px] p-4 md:p-8 lg:p-12" tabindex="-1">
+      {{ page.header }}{{ page.latest }}
+      <section class="mb-8 mt-4">
+        {% include '@dwars2026/components/section-header.html.twig' with { title: 'recente artikels'|t } %}
+        {{ page.content }}
+      </section>
+      {% if page.sidebar_first %}<aside class="mt-8">{{ page.sidebar_first }}</aside>{% endif %}
+    </main>
+    {% include '@dwars2026/components/copyright-corner.html.twig' %}
+  </div>
+</div>

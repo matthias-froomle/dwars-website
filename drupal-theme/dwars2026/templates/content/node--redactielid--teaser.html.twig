@@ -1,0 +1,24 @@
+<article{{ attributes.addClass('h-full', 'w-full') }}>
+  <a href="{{ url }}" class="{{ dwars_card_rotation }} group relative block h-full w-full transition-transform duration-300 hover:rotate-0">
+    <span class="absolute inset-0 z-0 translate-x-1 translate-y-1 bg-black transition-transform group-hover:translate-x-2 group-hover:translate-y-2"></span>
+    <span class="relative z-10 flex h-full flex-col justify-center border-2 border-black bg-white p-3 transition-colors dark:border-gray-500 dark:bg-[#111]">
+      <span class="relative mb-2 aspect-[4/5] w-full overflow-hidden border border-black grayscale transition-all duration-300 group-hover:grayscale-0">
+        {% if dwars_has_portrait %}
+          <span class="dwars-redactie-photo">{{ content.field_foto }}</span>
+        {% else %}
+          <svg class="h-full w-full object-cover" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <rect width="100" height="100" fill="#e0e0e0"/>
+            <polygon points="0,0 58,0 35,38" fill="#111"/>
+            <circle cx="78" cy="35" r="31" fill="#ff0055"/>
+            <rect x="8" y="48" width="55" height="20" fill="#111" transform="rotate(-18 8 48)"/>
+            <path d="M60 67 L86 91 M86 67 L60 91" stroke="#ff0055" stroke-width="6"/>
+            <text x="48" y="62" font-family="sans-serif" font-weight="900" font-size="42" fill="#ff0055" text-anchor="middle" opacity=".22" transform="rotate(-15 48 62)">{{ dwars_initial }}</text>
+            <rect x="0" y="0" width="100" height="100" fill="none" stroke="#111" stroke-width="8"/>
+          </svg>
+        {% endif %}
+      </span>
+      <h2 class="mb-1 font-heading text-lg uppercase leading-none text-black transition-colors group-hover:text-dwars-pink dark:text-white">{{ label }}</h2>
+      {% if dwars_primary_role and dwars_primary_role != 'Lid' %}<span class="text-[10px] font-bold uppercase leading-tight tracking-widest text-gray-500 transition-colors dark:text-gray-400">{{ dwars_primary_role }}</span>{% endif %}
+    </span>
+  </a>
+</article>

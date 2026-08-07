@@ -1,0 +1,12 @@
+{% if title %}<h3>{{ title }}</h3>{% endif %}
+<div{{ attributes.addClass('grid', 'grid-cols-2', 'gap-6', 'sm:grid-cols-3', 'md:grid-cols-4', 'md:gap-8', 'lg:grid-cols-5', 'xl:grid-cols-6') }}>
+  {% if options.alignment == 'horizontal' %}
+    {% for row in items %}
+      {% for column in row.content %}<div>{{ column.content }}</div>{% endfor %}
+    {% endfor %}
+  {% else %}
+    {% for column in items %}
+      {% for row in column.content %}<div>{{ row.content }}</div>{% endfor %}
+    {% endfor %}
+  {% endif %}
+</div>

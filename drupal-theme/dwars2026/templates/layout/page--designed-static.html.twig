@@ -1,0 +1,8 @@
+<div class="flex min-h-screen w-full flex-col md:flex-row">
+  {% include '@dwars2026/components/mobile-header.html.twig' %}
+  {% include '@dwars2026/components/sidebar.html.twig' %}
+  <div class="dwars-page-frame">
+    <main id="main-content" class="dwars-full-height-main mx-auto w-full max-w-[1300px]" tabindex="-1">{{ page.content }}</main>
+    {% include '@dwars2026/components/copyright-corner.html.twig' %}
+  </div>
+</div>

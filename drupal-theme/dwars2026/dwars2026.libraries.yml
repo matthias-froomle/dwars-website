@@ -1,0 +1,10 @@
+global:
+  version: 2026.08.06.1
+  css:
+    theme:
+      dist/css/main.css: { minified: true }
+  js:
+    src/js/dwars.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

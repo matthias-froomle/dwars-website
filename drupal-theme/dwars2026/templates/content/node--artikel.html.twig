@@ -1,0 +1,21 @@
+<article{{ attributes.addClass('flex', 'h-full', 'w-full', 'flex-col', 'lg:flex-row') }}>
+  <div class="mx-auto w-full max-w-4xl flex-1 p-6 md:p-12 md:pr-6">
+    {% if dwars_article_image %}<div class="dwars-article-image relative -ml-[5%] mb-12 aspect-[21/9] w-[110%] overflow-hidden bg-dwars-gray grayscale transition-all duration-700 hover:grayscale-0 dark:bg-gray-800">{{ dwars_article_image }}</div>{% endif %}
+    {% if dwars_tape_tags %}<div class="mb-8 flex flex-wrap gap-4">{% for tag in dwars_tape_tags %}<a href="{{ tag.url }}" class="bg-tape inline-flex items-center px-3 py-1 font-heading text-sm uppercase tracking-wider text-dwars-text transition-colors hover:bg-dwars-pink hover:text-white">{{ tag.label }}</a>{% endfor %}</div>{% endif %}
+    <h1{{ title_attributes.addClass('mb-8', 'px-2', 'font-heading', 'text-6xl', 'uppercase', 'leading-tight', 'tracking-wide', 'drop-shadow-sm', 'transition-colors', 'dark:text-white') }}>{{ label }}</h1>
+    {% if content.field_inleiding %}<div class="mb-8 text-xl font-bold leading-relaxed dark:text-gray-200">{{ content.field_inleiding }}</div>{% endif %}
+    <div class="mb-12 border-b-2 border-dashed border-gray-600 pb-4 text-sm font-bold uppercase tracking-widest md:border-gray-300 dark:border-gray-600">
+      <time datetime="{{ node.getCreatedTime|date('c') }}">{{ dwars_published }}</time>{% if dwars_article_authors %} — {% for author in dwars_article_authors %}<a href="{{ author.url }}" class="transition-colors hover:text-dwars-pink">{{ author.label }}</a>{{ not loop.last ? ', ' }}{% endfor %}{% elseif dwars_author_external %} — {{ dwars_author_external }}{% endif %}
+    </div>
+    <div class="dwars-article-prose dwars-prose max-w-none text-gray-200 md:text-gray-800 dark:text-gray-300">{{ content.field_inhoud }}</div>
+    <div class="mt-16 border-t-2 border-black pt-8 text-sm dark:border-white">{% if dwars_article_authors %}<p>Auteur: {% for author in dwars_article_authors %}<a href="{{ author.url }}" class="font-bold underline transition-colors hover:text-dwars-pink">{{ author.label }}</a>{{ not loop.last ? ', ' }}{% endfor %}</p>{% endif %}</div>
+    {{ content.links }}
+    {% if content.comment_node_artikel %}<section class="mt-12">{{ content.comment_node_artikel }}</section>{% endif %}
+  </div>
+  <aside class="dwars-article-aside w-[320px] shrink-0 border-l-2 border-dashed border-gray-200 bg-[#fefefe] p-8 pl-6 transition-colors dark:border-gray-700 dark:bg-[#222]">
+    <div class="sticky top-8 space-y-12">
+      {% if dwars_related_articles %}<section class="relative border border-gray-200 bg-[#f8f8f8] p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"><span class="bg-tape absolute -top-3 left-1/2 z-10 h-6 w-16 -translate-x-1/2 rotate-2 opacity-30"></span><h2 class="mb-6 font-heading text-2xl uppercase">Gerelateerde artikels</h2><div class="dwars-related-articles">{{ dwars_related_articles }}</div></section>{% endif %}
+      {% if dwars_article_ads %}<div class="dwars-article-advertisements">{{ dwars_article_ads }}</div>{% endif %}
+    </div>
+  </aside>
+</article>

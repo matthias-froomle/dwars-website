@@ -1,0 +1,6 @@
+<article{{ attributes.addClass('mx-auto', 'max-w-4xl') }}>
+  {{ title_prefix }}
+  {% if not page %}<h2{{ title_attributes.addClass('mb-4', 'font-heading', 'text-3xl', 'uppercase', 'tracking-wide') }}><a href="{{ url }}">{{ label }}</a></h2>{% else %}<h1{{ title_attributes.addClass('mb-8', 'font-heading', 'text-5xl', 'uppercase', 'leading-none', 'tracking-wide', 'md:text-7xl') }}>{{ label }}</h1>{% endif %}
+  <div{{ content_attributes.addClass('dwars-prose') }}>{{ content }}</div>
+  {{ title_suffix }}
+</article>

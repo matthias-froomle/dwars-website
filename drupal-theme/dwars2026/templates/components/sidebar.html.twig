@@ -1,0 +1,41 @@
+<aside class="dwars-desktop-sidebar relative h-screen w-1/4 min-w-[260px] max-w-[320px] shrink-0 md:sticky md:top-0" aria-label="{{ 'Website navigation'|t }}">
+  <div class="pointer-events-none absolute inset-0 z-0 flex" aria-hidden="true">
+    <div class="flex-1 bg-black"></div>
+    <div class="relative -ml-px h-full w-[90px]">
+      <img src="{{ dwars_asset_base }}/sidebar/scheur_zijbalk_zwart.png" alt="" class="h-full w-full object-fill object-left">
+    </div>
+  </div>
+
+  <div class="relative z-10 flex h-full w-full flex-col overflow-y-auto overflow-x-hidden pb-4 pl-5 pr-16 pt-6">
+    <a href="{{ path('<front>') }}" class="flex shrink-0 flex-col gap-1.5" aria-label="{{ 'DWARS home'|t }}">
+      <span data-dwars-logo class="relative block aspect-[2.5/1] w-[85%] origin-center">
+        <img src="{{ dwars_asset_base }}/{{ dwars_is_krom ? 'krom_logo.png' : 'dwarslogo_website.png' }}" alt="{{ dwars_is_krom ? 'Krom' : 'DWARS' }}" class="absolute inset-0 h-full w-full object-contain object-left">
+      </span>
+      <span class="relative block aspect-[1.6/1] w-[38%] opacity-90 transition-all hover:-rotate-1 hover:scale-[1.03] hover:opacity-100">
+        <img src="{{ dwars_asset_base }}/sidebar/nieuwste_editie.png" alt="{{ 'Newest edition'|t }}" class="absolute inset-0 h-full w-full object-contain object-left drop-shadow-sm">
+      </span>
+    </a>
+
+    <div class="mt-4 flex flex-1 flex-col justify-center gap-2.5">
+      <form action="{{ dwars_search_url }}" method="get" class="relative flex w-[75%] items-center">
+        <label class="sr-only" for="dwars-search-desktop">{{ 'Search'|t }}</label>
+        <input id="dwars-search-desktop" name="keys" type="search" placeholder="Zoeken?!" class="w-full rounded-full border border-white bg-transparent px-2 py-0.5 font-heading text-[13px] tracking-widest text-white placeholder:text-white/70 focus:border-dwars-pink focus:outline-none">
+        <button type="submit" class="absolute right-2 flex h-4 w-4 items-center justify-center" aria-label="{{ 'Search'|t }}">
+          <img src="{{ dwars_asset_base }}/icons/icons_zoeken.png" alt="" class="h-3 w-3 object-contain brightness-0 invert">
+        </button>
+      </form>
+
+      <nav class="mt-1 flex flex-col gap-1.5 font-brother text-white" aria-label="{{ 'Main navigation'|t }}">
+        {% for item in dwars_navigation %}
+          <a href="{{ item.url }}" {{ item.krom ? 'data-dwars-krom' : '' }} class="group flex items-center gap-1.5 uppercase tracking-wide transition-colors hover:text-dwars-pink">
+            <img src="{{ dwars_asset_base }}/{{ item.icon }}" alt="" class="h-3 w-3 shrink-0 object-contain">
+            <span class="text-[13px] font-bold group-hover:drop-shadow-md">{{ item.label }}</span>
+          </a>
+        {% endfor %}
+      </nav>
+    </div>
+
+    <div class="mb-3 mt-3 flex w-[65%]">{% include '@dwars2026/components/theme-toggle.html.twig' %}</div>
+    <div class="mt-auto w-full shrink-0 overflow-hidden pr-2 pt-3">{% include '@dwars2026/components/categories.html.twig' with { desktop_grid: true, include_column: false } %}</div>
+  </div>
+</aside>

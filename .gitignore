@@ -42,3 +42,6 @@ next-env.d.ts
 .venv/
 *.py
 
+# Local Drupal/DDEV runtime and generated release artifacts.
+/.local-drupal/
+/artifacts/

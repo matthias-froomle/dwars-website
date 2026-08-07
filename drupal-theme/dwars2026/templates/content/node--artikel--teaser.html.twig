@@ -1,0 +1,18 @@
+<article{{ attributes.addClass('group', 'relative', 'mb-6', 'break-inside-avoid', 'border-b-2', 'border-white', 'pb-4', 'transition-all', 'duration-300', 'md:border-black', 'dark:border-white') }}>
+  {{ title_prefix }}
+  <a href="{{ dwars_node_url }}" class="relative block h-full w-full">
+    {% if dwars_has_photo and dwars_card_variant != 'text' %}
+      <div class="dwars-card-image relative w-full overflow-hidden grayscale transition-all duration-700 group-hover:grayscale-0">
+        {{ content.field_artikelfoto }}
+        <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-90"></span>
+        <span class="pointer-events-none absolute bottom-0 left-0 w-5/6 p-5 md:p-6"><h2{{ title_attributes.addClass('line-clamp-3', 'font-heading', 'text-lg', 'uppercase', 'leading-tight', 'tracking-wide', 'text-white', 'drop-shadow-md', 'transition-colors', 'group-hover:text-dwars-pink', 'md:text-xl') }}>{{ label }}</h2></span>
+      </div>
+    {% else %}
+      <div class="mb-2 py-2 transition-colors group-hover:bg-white/5 md:group-hover:bg-black/5 dark:group-hover:bg-white/5">
+        <h2{{ title_attributes.addClass('mb-3', 'font-heading', 'text-xl', 'uppercase', 'leading-tight', 'tracking-wide', 'text-white', 'transition-colors', 'group-hover:text-dwars-pink', 'md:text-2xl', 'md:text-black', 'dark:text-white') }}>{{ label }}</h2>
+        {% if dwars_excerpt %}<p class="text-sm font-medium leading-snug text-gray-300 transition-colors md:text-base md:text-black dark:text-gray-300">{{ dwars_excerpt }}</p>{% endif %}
+      </div>
+    {% endif %}
+  </a>
+  {{ title_suffix }}
+</article>

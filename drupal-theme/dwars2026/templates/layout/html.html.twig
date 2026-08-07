@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html{{ html_attributes }}>
+  <head>
+    <head-placeholder token="{{ placeholder_token }}">
+    <title>{{ head_title|safe_join(' | ') }}</title>
+    <css-placeholder token="{{ placeholder_token }}">
+    <js-placeholder token="{{ placeholder_token }}">
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('dwars-theme');
+          var dark = saved === 'dark' || (!saved && matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+          document.addEventListener('error', function (event) {
+            var image = event.target;
+            if (image && image.matches && image.matches('main img')) {
+              image.hidden = true;
+              var frame = image.closest('.dwars-hero-image, .dwars-card-image, .dwars-edition-cover, .dwars-article-image, .views-field-field-artikelfoto');
+              if (frame) frame.classList.add('dwars-image-missing');
+            }
+          }, true);
+        } catch (error) {}
+      }());
+    </script>
+  </head>
+  <body{{ attributes }}>
+    <svg class="absolute h-0 w-0" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="dwars-category-pink" color-interpolation-filters="sRGB">
+          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -.2126 -.7152 -.0722 0 1" result="darkness" />
+          <feComposite in="darkness" in2="SourceAlpha" operator="in" result="bounded-darkness" />
+          <feComponentTransfer in="bounded-darkness" result="letter-mask">
+            <feFuncA type="table" tableValues="0 0 .35 1" />
+          </feComponentTransfer>
+          <feFlood class="dwars-category-pink-flood" result="palette-pink" />
+          <feComposite in="palette-pink" in2="letter-mask" operator="in" result="pink-letters" />
+          <feComposite in="pink-letters" in2="SourceGraphic" operator="over" />
+        </filter>
+      </defs>
+    </svg>
+    <a href="#main-content" class="absolute left-4 top-4 z-[100] -translate-y-24 bg-dwars-pink px-4 py-3 font-bold text-white focus:translate-y-0">{{ 'Skip to main content'|t }}</a>
+    {{ page_top }}
+    {{ page }}
+    {{ page_bottom }}
+    <js-bottom-placeholder token="{{ placeholder_token }}">
+  </body>
+</html>
