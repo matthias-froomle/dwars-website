@@ -77,6 +77,26 @@
     outline: 3px solid #ff0055;
     outline-offset: 3px;
   }
+
+  /* Base theme is intentionally disabled, so retain Drupal's accessible
+   * visually-hidden contract for pager and contextual-link helper text. */
+  .visually-hidden {
+    position: absolute !important;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    width: 1px;
+    height: 1px;
+    word-wrap: normal;
+  }
+
+  .visually-hidden.focusable:active,
+  .visually-hidden.focusable:focus-within {
+    position: static !important;
+    overflow: visible;
+    clip: auto;
+    width: auto;
+    height: auto;
+  }
 }
 
 @media (max-width: 767px) {
@@ -474,6 +494,222 @@
   @media (min-width: 900px) {
     .dwars-culture-agenda__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .dwars-editorial-tool {
+    width: 100%;
+  }
+
+  .dwars-editorial-tool__intro,
+  .dwars-editorial-tool__empty,
+  .dwars-editorial-tool__footer {
+    margin-block: 1.5rem;
+    font-family: var(--font-brother);
+    line-height: 1.6;
+  }
+
+  .dwars-editorial-tool__filters {
+    position: relative;
+    margin: 1rem 0 2.5rem;
+    border-block: 1px solid currentColor;
+    padding: 1.25rem 0;
+  }
+
+  .dwars-editorial-tool__filters form,
+  .dwars-editorial-tool__filters .form--inline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    align-items: end;
+    gap: 1rem;
+  }
+
+  .dwars-editorial-tool__filters .form-item,
+  .dwars-editorial-tool__filters .form-actions {
+    margin: 0;
+  }
+
+  .dwars-editorial-tool__filters label,
+  .dwars-editorial-tool__filters legend,
+  .dwars-editorial-tool__filters .form-item__label,
+  .dwars-editorial-tool__filters .fieldset-legend,
+  .dwars-editorial-tool__results .views-label {
+    display: block;
+    margin-bottom: .4rem;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    letter-spacing: .06em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .dwars-editorial-tool__filters input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]),
+  .dwars-editorial-tool__filters select {
+    min-height: 2.8rem;
+    border: 1px solid currentColor;
+    border-radius: 9999px;
+    padding: .55rem 1rem;
+  }
+
+  .dwars-editorial-tool__filters input[type="submit"] {
+    min-height: 3rem;
+    border: 0;
+    background-color: transparent;
+    background-image: url("../../assets/images/extra/tape-light.png");
+    background-position: center;
+    background-size: 100% 100%;
+    color: var(--color-dwars-text);
+    filter: drop-shadow(0 2px 2px rgb(0 0 0 / .2));
+    padding: .55rem 1.4rem;
+    transition: color .2s ease, transform .2s ease;
+  }
+
+  .dwars-editorial-tool__filters input[type="submit"]:hover,
+  .dwars-editorial-tool__filters input[type="submit"]:focus-visible {
+    color: var(--color-dwars-pink);
+    transform: translateY(-2px) rotate(-1deg);
+  }
+
+  .dwars-editorial-tool__results {
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-color: var(--color-dwars-pink) transparent;
+  }
+
+  .dwars-editorial-tool__results table {
+    width: 100%;
+    min-width: 48rem;
+    border-collapse: collapse;
+    font-family: var(--font-brother);
+  }
+
+  .dwars-editorial-tool__results th {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    border-bottom: 3px solid var(--color-dwars-pink);
+    background: var(--background);
+    padding: .9rem .75rem;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    letter-spacing: .06em;
+    line-height: 1;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .dwars-editorial-tool__results td {
+    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 28%, transparent);
+    padding: .8rem .75rem;
+    vertical-align: top;
+  }
+
+  .dwars-editorial-tool__results tbody tr {
+    transition: background-color .2s ease;
+  }
+
+  .dwars-editorial-tool__results tbody tr:hover,
+  .dwars-editorial-tool__results tbody tr:focus-within {
+    background: color-mix(in srgb, var(--color-dwars-pink) 10%, transparent);
+  }
+
+  .dwars-editorial-tool__results a {
+    font-weight: 700;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    transition: color .2s ease;
+  }
+
+  .dwars-editorial-tool__results a:hover,
+  .dwars-editorial-tool__results a:focus-visible {
+    color: var(--color-dwars-pink);
+    text-decoration-line: underline;
+  }
+
+  .dwars-editorial-tool__results .views-view-grid {
+    width: 100%;
+  }
+
+  .dwars-editorial-tool__results .views-view-grid .views-row {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .dwars-editorial-tool__results .views-view-grid .views-col {
+    position: relative;
+    width: auto !important;
+    min-width: 0;
+    border: 1px solid color-mix(in srgb, var(--foreground) 28%, transparent);
+    padding: 1rem;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+
+  .dwars-editorial-tool__results .views-view-grid .views-col::before {
+    position: absolute;
+    top: -.3rem;
+    left: .8rem;
+    width: 3.5rem;
+    height: .5rem;
+    background: var(--color-dwars-pink);
+    clip-path: polygon(2% 12%, 98% 0, 100% 82%, 0 100%);
+    content: "";
+    transform: rotate(-2deg);
+  }
+
+  .dwars-editorial-tool__results .views-view-grid .views-col:hover,
+  .dwars-editorial-tool__results .views-view-grid .views-col:focus-within {
+    border-color: var(--color-dwars-pink);
+    transform: translateY(-2px);
+  }
+
+  .dwars-editorial-tool--fotograaf .views-field-title,
+  .dwars-editorial-tool--tags .views-field-name {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    letter-spacing: .04em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .dwars-editorial-tool--fotograaf .views-field-field-foto img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    filter: grayscale(1);
+    transition: filter .3s ease;
+  }
+
+  .dwars-editorial-tool--fotograaf .views-col:hover .views-field-field-foto img {
+    filter: grayscale(0);
+  }
+
+  .dwars-editorial-tool--reserve .dwars-editorial-tool__results {
+    max-height: min(70vh, 58rem);
+    border-block: 1px solid currentColor;
+  }
+
+  .dwars-editorial-tool--meewerken-lijst .dwars-editorial-tool__results > .views-row,
+  .dwars-editorial-tool--meewerken-lijst .dwars-editorial-tool__results > div > .views-row {
+    margin-bottom: 1.25rem;
+    border-left: .4rem solid var(--color-dwars-pink);
+    padding: 1rem 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .dwars-editorial-tool__results .views-view-grid .views-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .dwars-editorial-tool--fotograaf .views-view-grid .views-row {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .dwars-editorial-tool--tags .views-view-grid .views-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 

@@ -6,9 +6,11 @@
  */
 
 use Drupal\Core\Url;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Render\Markup;
 use Drupal\node\NodeInterface;
+use Drupal\taxonomy\TermInterface;
 
 /**
  * Implements hook_preprocess().
@@ -35,9 +37,8 @@ function dwars2026_preprocess_html(array &$variables): void {
  */
 function dwars2026_preprocess_page(array &$variables): void {
   $route_match = \Drupal::routeMatch();
-  $current_path = \Drupal::service('path.current')->getPath();
   $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
-  $variables['dwars_is_krom'] = $current_path === '/taxonomy/term/4691';
+  $variables['dwars_is_krom'] = _dwars2026_is_krom_term($route_match->getParameter('taxonomy_term'));
   $variables['dwars_search_url'] = Url::fromRoute('search.view_node_search', [], [
     'language' => \Drupal::languageManager()->getCurrentLanguage(),
   ])->toString();
@@ -48,20 +49,14 @@ function dwars2026_preprocess_page(array &$variables): void {
     'language' => \Drupal::languageManager()->getCurrentLanguage(),
   ])->toString();
 
-  $variables['dwars_navigation'] = _dwars2026_navigation();
-
-  $variables['dwars_categories'] = array_values(array_filter([
-    _dwars2026_category('tags/tags_unief.png', 4027, '-rotate-1'),
-    _dwars2026_category('tags/tags_maatschappij.png', 18, 'rotate-1'),
-    _dwars2026_category('tags/tags_cultuur.png', 6, '-rotate-2'),
-    _dwars2026_category('tags/tags_onderzoek.png', 4028, 'rotate-2'),
-    _dwars2026_category('tags/tags_t_stad.png', 7, '-rotate-1'),
-    _dwars2026_category('tags/tags_opinie.png', 4053, 'rotate-1'),
-    _dwars2026_category('tags/tags_satire.png', 4055, '-rotate-1'),
-    _dwars2026_category('tags/tags_editoriaal.png', 4026, 'rotate-2'),
-    _dwars2026_category('tags/tags_poezie.png', 4034, '-rotate-2'),
-    _dwars2026_category('tags/tags_column.png', 4032, 'rotate-1'),
-  ]));
+  // The sidebar is assembled from CMS entities rather than render arrays, so
+  // explicitly bubble their cache metadata into the page. Menu/term edits then
+  // invalidate cached pages without requiring a manual cache rebuild.
+  $cacheability = CacheableMetadata::createFromRenderArray($variables['page']);
+  $cacheability->addCacheContexts(['languages:language_interface']);
+  $variables['dwars_navigation'] = _dwars2026_navigation($cacheability);
+  $variables['dwars_categories'] = _dwars2026_categories($cacheability);
+  $cacheability->applyTo($variables['page']);
 
   // Make variables available to directly included component templates.
   $variables['dwars_language'] = $language;
@@ -78,16 +73,7 @@ function dwars2026_preprocess_node(array &$variables): void {
   }
 
   $variables['dwars_node_url'] = $node->toUrl()->toString();
-  $designed_pages = [
-    78874 => ['key' => 'over'],
-    78201 => ['key' => 'redacteur-worden'],
-    44 => ['key' => 'adverteren'],
-    78487 => ['key' => 'contact'],
-  ];
-  $variables['dwars_designed_page'] = $designed_pages[(int) $node->id()] ?? [];
-  if ($variables['dwars_designed_page']) {
-    $variables['dwars_designed_page']['title'] = $node->label();
-  }
+  $variables['dwars_designed_page'] = _dwars2026_designed_page($node);
   $variables['dwars_designed_body'] = NULL;
   $variables['dwars_contact'] = NULL;
   if ($variables['dwars_designed_page'] && $node->hasField('body') && !$node->get('body')->isEmpty()) {
@@ -210,6 +196,17 @@ function dwars2026_preprocess_node(array &$variables): void {
  */
 function dwars2026_preprocess_views_view(array &$variables): void {
   $view = $variables['view'];
+  $editorial_tools = [
+    'credits' => (string) t('Credits'),
+    'fotograaf' => (string) t('Fotograaf'),
+    'tags' => (string) t('Tags'),
+    'meewerken_lijst' => (string) t('Meewerken'),
+    'reserve' => (string) t('Reserve'),
+  ];
+  if (isset($editorial_tools[$view->id()])) {
+    $variables['dwars_editorial_tool_id'] = $view->id();
+    $variables['dwars_editorial_tool_title'] = $editorial_tools[$view->id()];
+  }
   if ($view->id() === 'related_articles') {
     $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
     $variables['dwars_related_rows'] = [];
@@ -274,7 +271,7 @@ function dwars2026_preprocess_views_view(array &$variables): void {
   }
   if ($view->id() === 'taxonomy_term') {
     $term = \Drupal::routeMatch()->getParameter('taxonomy_term');
-    if ($term && (int) $term->id() === 4691) {
+    if (_dwars2026_is_krom_term($term)) {
       $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
       $nodes = [];
       foreach ($view->result as $result) {
@@ -462,6 +459,15 @@ function dwars2026_preprocess_input(array &$variables): void {
  */
 function dwars2026_theme_suggestions_page_alter(array &$suggestions, array $variables): void {
   $route = \Drupal::routeMatch()->getRouteName();
+  if (in_array($route, [
+    'view.credits.page_1',
+    'view.fotograaf.page_1',
+    'view.tags.page_1',
+    'view.meewerken_lijst.page_1',
+    'view.reserve.page_1',
+  ], TRUE)) {
+    $suggestions[] = 'page__editorial_tools';
+  }
   if (in_array($route, ['view.redactie.page_1', 'view.freelance.page_1', 'view.oud_redactie.page_1'], TRUE)) {
     $suggestions[] = 'page__redactie';
   }
@@ -479,7 +485,7 @@ function dwars2026_theme_suggestions_page_alter(array &$suggestions, array $vari
   }
   if ($route === 'entity.taxonomy_term.canonical') {
     $term = \Drupal::routeMatch()->getParameter('taxonomy_term');
-    if ($term && (int) $term->id() === 4691) {
+    if (_dwars2026_is_krom_term($term)) {
       $suggestions[] = 'page__krom';
     }
     else {
@@ -488,7 +494,7 @@ function dwars2026_theme_suggestions_page_alter(array &$suggestions, array $vari
   }
   if ($route === 'entity.node.canonical') {
     $node = \Drupal::routeMatch()->getParameter('node');
-    if ($node instanceof NodeInterface && in_array((int) $node->id(), [44, 78201, 78487, 78874], TRUE)) {
+    if ($node instanceof NodeInterface && _dwars2026_designed_page($node)) {
       $suggestions[] = 'page__designed_static';
     }
     if ($node instanceof NodeInterface && in_array($node->bundle(), ['artikel', 'redactielid'], TRUE)) {
@@ -503,7 +509,7 @@ function dwars2026_theme_suggestions_page_alter(array &$suggestions, array $vari
 function dwars2026_theme_suggestions_node_alter(array &$suggestions, array $variables): void {
   $node = $variables['elements']['#node'] ?? NULL;
   if ($node instanceof NodeInterface && !empty($variables['elements']['#view_mode']) && $variables['elements']['#view_mode'] === 'full') {
-    if (in_array((int) $node->id(), [44, 78201, 78487, 78874], TRUE)) {
+    if (_dwars2026_designed_page($node)) {
       $suggestions[] = 'node__designed_static';
     }
   }
@@ -512,7 +518,7 @@ function dwars2026_theme_suggestions_node_alter(array &$suggestions, array $vari
 /**
  * Loads the primary navigation labels, order, and destinations from Drupal.
  */
-function _dwars2026_navigation(): array {
+function _dwars2026_navigation(?CacheableMetadata $cacheability = NULL): array {
   $parameters = (new MenuTreeParameters())
     ->setMaxDepth(1)
     ->onlyEnabledLinks();
@@ -521,9 +527,11 @@ function _dwars2026_navigation(): array {
 
   foreach ($tree as $element) {
     $link = $element->link;
+    if ($cacheability) {
+      $cacheability->addCacheableDependency($link);
+    }
     $url = $link->getUrlObject();
     $route = $url->isRouted() ? $url->getRouteName() : '';
-    $route_parameters = $url->isRouted() ? $url->getRouteParameters() : [];
 
     // Search has its own control in the theme header.
     if ($route === 'search.view_node_search') {
@@ -533,13 +541,7 @@ function _dwars2026_navigation(): array {
     $icon = match ($route) {
       'view.archive.page_1' => 'icons/icons_edities.png',
       'view.redactie.page_1' => 'icons/icons_redactie.png',
-      'entity.node.canonical' => match ((int) ($route_parameters['node'] ?? 0)) {
-        78874 => 'icons/icons_over.png',
-        78201 => 'icons/icons_redacteur_worden.png',
-        44 => 'icons/icons_adverteren.png',
-        78487 => 'icons/icons_contact.png',
-        default => 'icons/icons_over.png',
-      },
+      'entity.node.canonical' => _dwars2026_designed_page_icon($url->getRouteParameters()['node'] ?? NULL),
       default => 'icons/icons_over.png',
     };
 
@@ -552,9 +554,13 @@ function _dwars2026_navigation(): array {
   }
 
   // Krom is a taxonomy landing page rather than a menu item in the restored
-  // site. Its visible label and URL still come from the Drupal entity.
-  $krom = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load(4691);
+  // site. Resolve it semantically so recreating the term does not require a
+  // theme change.
+  $krom = _dwars2026_krom_term();
   if ($krom) {
+    if ($cacheability) {
+      $cacheability->addCacheableDependency($krom);
+    }
     $items[] = [
       'label' => $krom->label(),
       'icon' => 'icons/icons_krom.png',
@@ -567,20 +573,166 @@ function _dwars2026_navigation(): array {
 }
 
 /**
- * Builds a category entry for the mobile and desktop category navigation.
+ * Resolves the designed static-page contract from CMS-owned aliases or titles.
  */
-function _dwars2026_category(string $image, int $tid, string $rotation): ?array {
-  $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tid);
-  if (!$term) {
-    return NULL;
+function _dwars2026_designed_page(NodeInterface $node): array {
+  if ($node->bundle() !== 'page') {
+    return [];
   }
 
-  return [
-    'label' => $term->label(),
-    'image' => $image,
-    'url' => $term->toUrl()->toString(),
-    'rotation' => $rotation,
+  $contracts = [
+    'visie' => 'over',
+    'over' => 'over',
+    'meewerken' => 'redacteur-worden',
+    'redacteur-worden' => 'redacteur-worden',
+    'adverteren' => 'adverteren',
+    'contact' => 'contact',
   ];
+  foreach (_dwars2026_entity_keys($node) as $candidate) {
+    if (isset($contracts[$candidate])) {
+      return ['key' => $contracts[$candidate], 'title' => $node->label()];
+    }
+  }
+  return [];
+}
+
+/**
+ * Selects an icon for a CMS-owned designed page.
+ */
+function _dwars2026_designed_page_icon(mixed $node_parameter): string {
+  $node = $node_parameter instanceof NodeInterface
+    ? $node_parameter
+    : (is_numeric($node_parameter) ? \Drupal::entityTypeManager()->getStorage('node')->load($node_parameter) : NULL);
+  $key = $node instanceof NodeInterface ? (_dwars2026_designed_page($node)['key'] ?? '') : '';
+  return match ($key) {
+    'redacteur-worden' => 'icons/icons_redacteur_worden.png',
+    'adverteren' => 'icons/icons_adverteren.png',
+    'contact' => 'icons/icons_contact.png',
+    default => 'icons/icons_over.png',
+  };
+}
+
+/**
+ * Loads Krom by its semantic taxonomy contract rather than a database ID.
+ */
+function _dwars2026_krom_term(): ?TermInterface {
+  static $resolved = FALSE;
+  static $krom = NULL;
+  if ($resolved) {
+    return $krom;
+  }
+  $resolved = TRUE;
+  $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties([
+    'vid' => 'tags',
+    'name' => 'krom',
+  ]);
+  foreach ($terms as $term) {
+    if ($term instanceof TermInterface && _dwars2026_is_krom_term($term)) {
+      $krom = $term;
+      break;
+    }
+  }
+  return $krom;
+}
+
+/**
+ * Checks whether a route parameter represents the Krom term.
+ */
+function _dwars2026_is_krom_term(mixed $term_parameter): bool {
+  $term = $term_parameter instanceof TermInterface
+    ? $term_parameter
+    : (is_numeric($term_parameter) ? \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($term_parameter) : NULL);
+  return $term instanceof TermInterface
+    && $term->bundle() === 'tags'
+    && in_array('krom', _dwars2026_entity_keys($term), TRUE);
+}
+
+/**
+ * Builds the ordered category navigation from the taxonomy vocabulary.
+ */
+function _dwars2026_categories(?CacheableMetadata $cacheability = NULL): array {
+  static $categories = NULL;
+  static $dependencies = [];
+  if (is_array($categories)) {
+    if ($cacheability) {
+      foreach ($dependencies as $dependency) {
+        $cacheability->addCacheableDependency($dependency);
+      }
+    }
+    return $categories;
+  }
+  $specifications = [
+    ['keys' => ['universiteit', 'unief'], 'image' => 'tags/tags_unief.png', 'rotation' => '-rotate-1'],
+    ['keys' => ['maatschappij'], 'image' => 'tags/tags_maatschappij.png', 'rotation' => 'rotate-1'],
+    ['keys' => ['cultuur'], 'image' => 'tags/tags_cultuur.png', 'rotation' => '-rotate-2'],
+    ['keys' => ['onderzoek'], 'image' => 'tags/tags_onderzoek.png', 'rotation' => 'rotate-2'],
+    ['keys' => ['antwerpen', 't-stad', 'stad'], 'image' => 'tags/tags_t_stad.png', 'rotation' => '-rotate-1'],
+    ['keys' => ['opinie'], 'image' => 'tags/tags_opinie.png', 'rotation' => 'rotate-1'],
+    ['keys' => ['satire'], 'image' => 'tags/tags_satire.png', 'rotation' => '-rotate-1'],
+    ['keys' => ['editoriaal'], 'image' => 'tags/tags_editoriaal.png', 'rotation' => 'rotate-2'],
+    ['keys' => ['poezie'], 'image' => 'tags/tags_poezie.png', 'rotation' => '-rotate-2'],
+    ['keys' => ['column'], 'image' => 'tags/tags_column.png', 'rotation' => 'rotate-1'],
+  ];
+  $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties(['vid' => 'hoofdcategorie_website']);
+  $terms_by_key = [];
+  foreach ($terms as $term) {
+    if (!$term instanceof TermInterface) {
+      continue;
+    }
+    foreach (_dwars2026_entity_keys($term) as $key) {
+      $terms_by_key[$key] ??= $term;
+    }
+  }
+
+  $categories = [];
+  foreach ($specifications as $specification) {
+    $term = NULL;
+    foreach ($specification['keys'] as $key) {
+      if (isset($terms_by_key[$key])) {
+        $term = $terms_by_key[$key];
+        break;
+      }
+    }
+    if (!$term) {
+      continue;
+    }
+    $dependencies[] = $term;
+    $categories[] = [
+      'label' => $term->label(),
+      'image' => $specification['image'],
+      'url' => $term->toUrl()->toString(),
+      'rotation' => $specification['rotation'],
+    ];
+  }
+  if ($cacheability) {
+    foreach ($dependencies as $dependency) {
+      $cacheability->addCacheableDependency($dependency);
+    }
+  }
+  return $categories;
+}
+
+/**
+ * Returns normalized label and URL-alias keys for a content entity.
+ */
+function _dwars2026_entity_keys(object $entity): array {
+  $values = method_exists($entity, 'label') ? [(string) $entity->label()] : [];
+  if (method_exists($entity, 'toUrl')) {
+    $path = parse_url($entity->toUrl()->toString(), PHP_URL_PATH);
+    if (is_string($path) && $path !== '') {
+      $values[] = basename($path);
+    }
+  }
+  $keys = [];
+  foreach ($values as $value) {
+    $value = \Drupal::transliteration()->transliterate($value, 'en');
+    $value = mb_strtolower(trim($value));
+    $value = trim(preg_replace('/[^a-z0-9]+/', '-', $value) ?? $value, '-');
+    if ($value !== '') {
+      $keys[$value] = TRUE;
+    }
+  }
+  return array_keys($keys);
 }
 
 /**

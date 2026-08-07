@@ -24,7 +24,7 @@ transitions, and the browser console must also pass.
 | `/redacteur-worden` | `/nl/meewerken` | Verified | Reference shell and typography using the processed Drupal recruitment content. |
 | `/adverteren` | `/nl/adverteren` | Theme verified; CMS structure differs | The Drupal node title and complete processed body are styled by the reference shell; tariff copy, tables, addresses, and deadlines are not duplicated in Twig. The restored node contains substantially larger tariff tables than the prototype mock. |
 | `/contact` | `/nl/contact` | Theme verified; CMS copy pending | The Drupal body is parsed into the reference information card and two-person grid without duplicating editorial values in Twig. The restored node lacks the prototype's `Algemene gegevens` heading and portrait references. |
-| `/krom` | `/nl/taxonomy/term/4691` | Theme verified; CMS population pending | Homepage-derived composition and Krom branding; hero, sidebar, and grid use only the taxonomy View result. The restored taxonomy currently contains only one article, so Drupal correctly renders the sparse state. |
+| `/krom` | Krom term in the `tags` vocabulary | Theme verified; CMS population pending | Homepage-derived composition and Krom branding; hero, sidebar, and grid use only the taxonomy View result. The semantic term contract avoids a database-ID dependency. The restored taxonomy currently contains only one article, so Drupal correctly renders the sparse state. |
 | `/artikels/[slug]` | Drupal article canonical URL | Verified | Hero/tags/title/body/credits composition plus Drupal related-article and advertisement Views. No ad creative is embedded in the theme. |
 
 ## Shared shell

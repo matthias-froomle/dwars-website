@@ -10,6 +10,7 @@
     "theme:install": "npm --prefix drupal-theme/dwars2026 install",
     "theme:build": "npm --prefix drupal-theme/dwars2026 run build",
     "theme:check": "npm --prefix drupal-theme/dwars2026 run check",
+    "theme:verify-local": "node scripts/verify-theme-local.mjs",
     "theme:package": "npm --prefix drupal-theme/dwars2026 run package",
     "editions:package": "./scripts/package-editions.sh"
   },

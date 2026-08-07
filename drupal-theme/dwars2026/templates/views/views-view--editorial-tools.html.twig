@@ -1,0 +1,19 @@
+<section{{ attributes.addClass('dwars-view', 'dwars-editorial-tool', 'dwars-editorial-tool--' ~ dwars_editorial_tool_id|clean_class) }}>
+  {{ title_prefix }}
+  {% include '@dwars2026/components/section-header.html.twig' with { title: dwars_editorial_tool_title } only %}
+  {{ title_suffix }}
+
+  {% if header %}<header class="dwars-editorial-tool__intro">{{ header }}</header>{% endif %}
+  {% if exposed %}<div class="dwars-editorial-tool__filters">{{ exposed }}</div>{% endif %}
+  {{ attachment_before }}
+  {% if rows %}
+    <div class="dwars-editorial-tool__results">{{ rows }}</div>
+  {% elseif empty %}
+    <div class="dwars-editorial-tool__empty">{{ empty }}</div>
+  {% endif %}
+  {{ pager }}
+  {{ attachment_after }}
+  {{ more }}
+  {% if footer %}<footer class="dwars-editorial-tool__footer">{{ footer }}</footer>{% endif %}
+  {{ feed_icons }}
+</section>

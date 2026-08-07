@@ -1,5 +1,6 @@
-import { mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { createHash } from 'node:crypto';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
@@ -17,4 +18,8 @@ const result = spawnSync('tar', [
   'dwars2026',
 ], { stdio: 'inherit' });
 if (result.status !== 0) process.exit(result.status ?? 1);
+const checksum = createHash('sha256').update(readFileSync(archive)).digest('hex');
+const checksumPath = `${archive}.sha256`;
+writeFileSync(checksumPath, `${checksum}  ${basename(archive)}\n`);
 console.log(archive);
+console.log(checksumPath);

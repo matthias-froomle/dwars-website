@@ -16,6 +16,17 @@ const required = [
   'templates/layout/html.html.twig',
   'templates/layout/page.html.twig',
   'templates/layout/page--front.html.twig',
+  'templates/layout/page--404.html.twig',
+  'templates/layout/page--editorial-tools.html.twig',
+  'templates/content/node--cultuur-strookje.html.twig',
+  'templates/views/views-view--editorial-tools.html.twig',
+  'templates/views/views-view--credits.html.twig',
+  'templates/views/views-view--fotograaf.html.twig',
+  'templates/views/views-view--tags.html.twig',
+  'templates/views/views-view--meewerken-lijst.html.twig',
+  'templates/views/views-view--reserve.html.twig',
+  'templates/navigation/pager.html.twig',
+  'templates/navigation/views-mini-pager.html.twig',
 ];
 const errors = [];
 const prototypeContentPatterns = [
@@ -44,6 +55,22 @@ if (existsSync(join(themeRoot, 'assets/images/editions'))) {
 }
 
 const files = walk(themeRoot);
+const themePhp = readFileSync(join(themeRoot, 'dwars2026.theme'), 'utf8');
+const legacyEntityIds = ['44', '4691', '78201', '78487', '78874', '4027', '4028', '4026', '4032', '4034', '4053', '4055'];
+for (const entityId of legacyEntityIds) {
+  if (new RegExp(`\\b${entityId}\\b`).test(themePhp)) {
+    errors.push(`Legacy Drupal entity ID ${entityId} must not be coupled to the runtime theme.`);
+  }
+}
+
+const info = readFileSync(join(themeRoot, 'dwars2026.info.yml'), 'utf8');
+if (!/^version:\s+\S+/m.test(info)) errors.push('Theme release version is missing.');
+for (const dependency of ['block', 'node', 'search', 'system', 'taxonomy', 'views']) {
+  if (!new RegExp(`^\\s+- drupal:${dependency}$`, 'm').test(info)) {
+    errors.push(`Missing Drupal module dependency: ${dependency}`);
+  }
+}
+
 for (const file of files.filter((path) => ['.twig', '.css', '.js', '.yml', '.theme'].includes(extname(path)))) {
   const source = readFileSync(file, 'utf8');
   if (/\b(next\/|nextjs|react-dom|__NEXT_DATA__)\b/i.test(source)) {
@@ -70,6 +97,10 @@ for (const file of files.filter((path) => ['.twig', '.css', '.js', '.yml', '.the
 for (const phpFile of ['dwars2026.theme']) {
   const php = spawnSync('php', ['-l', join(themeRoot, phpFile)], { encoding: 'utf8' });
   if (php.status !== 0) errors.push(php.stderr.trim() || php.stdout.trim());
+}
+for (const jsFile of files.filter((path) => extname(path) === '.js')) {
+  const node = spawnSync('node', ['--check', jsFile], { encoding: 'utf8' });
+  if (node.status !== 0) errors.push(node.stderr.trim() || node.stdout.trim());
 }
 
 if (errors.length) {

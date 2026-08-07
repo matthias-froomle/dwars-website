@@ -5,6 +5,9 @@ this repository. It is a standalone Drupal 11 theme (`base theme: false`) and
 does not run Next.js, React, JSON:API, or Node.js in production. The existing
 prototype remains the visual reference.
 
+The operational production checklist is
+[`production-release-checklist.md`](production-release-checklist.md).
+
 ## What is mapped to Drupal
 
 - The homepage uses all three rows of `latest:block_1`: the first record is the
@@ -18,10 +21,15 @@ prototype remains the visual reference.
 - Editions, editorial staff, advertisements, search, taxonomy, and static pages
   remain Drupal content and Views. Missing records are never filled with mock
   data by Twig or JavaScript.
+- Authenticated front-end Views for credits, photographers, tags, contributors,
+  and reserve content use the DWARS presentation. Administration and content
+  edit forms remain on Drupal's supported Claro administration theme.
 - Navigation labels, order, and destinations are loaded from
   `menu-dwars-topmenu`; the theme maps those entries to visual icons.
-- Krom points to taxonomy term 4691, renders that View's actual result, and keeps
-  the logo animation.
+- Krom is resolved from the `tags` vocabulary by its semantic name, renders
+  that View's actual result, and keeps the logo animation. Designed static pages
+  and category artwork are likewise matched by CMS aliases/labels rather than
+  environment-specific numeric entity IDs.
 - Light/dark preference, mobile navigation, search, and accessibility behavior
   are implemented with a small Drupal behavior in plain JavaScript.
 
@@ -36,7 +44,8 @@ npm run theme:check
 npm run theme:package
 ```
 
-The deployable result is `artifacts/dwars2026-theme.tar.gz`. The archive contains
+The deployable result is `artifacts/dwars2026-theme.tar.gz`, accompanied by
+`artifacts/dwars2026-theme.tar.gz.sha256`. The archive contains
 the compiled CSS, templates, configuration, JavaScript, fonts, and UI images. It
 does not contain `node_modules`, edition content/cover fallbacks, migration data,
 or the large edition PDFs. `theme:check` also rejects known prototype content in
@@ -72,6 +81,20 @@ npm run theme:build
 ./scripts/sync-theme-local.sh
 ddev drush cache:rebuild
 ```
+
+With the persistent local Chromium debug session running on port 9222, execute
+the repeatable production acceptance sweep:
+
+```bash
+npm run theme:verify-local
+```
+
+It checks 19 representative Drupal routes in desktop dark, desktop light, and
+mobile dark modes, including HTTP status, expected page components, the shared
+footer, responsive navigation shell, horizontal overflow, browser errors, the
+Dutch culture-filter label, and the real 404 response. Missing-resource requests
+are recorded separately because the local restore intentionally excludes the
+production public-upload tree; JavaScript/runtime errors still fail the check.
 
 Check at minimum the Dutch homepage, an article, archive, editorial staff,
 static pages, search, taxonomy/Krom, mobile navigation, dark mode, pager, and an
@@ -113,7 +136,8 @@ Do not perform these steps until local/editorial acceptance is complete and a
 fresh production backup exists.
 
 1. Build and check `artifacts/dwars2026-theme.tar.gz` from the exact reviewed
-   commit.
+   commit. Transfer the adjacent `.sha256` file and verify it on the server with
+   `sha256sum -c dwars2026-theme.tar.gz.sha256` before extracting.
 2. Upload the archive to the server via `ssh dwars@dwars.be`/SCP, extract it as
    `themes/custom/dwars2026`, and confirm ownership/permissions match
    `themes/custom/dwars2025`.
@@ -137,3 +161,21 @@ drush cache:rebuild
 
 Keep the deployment archive, pre-deploy database/files backup, command output,
 and smoke-test results together as the release evidence.
+
+## Editorial maintenance boundary
+
+Routine changes to articles, editions, culture events, people, roles, images,
+menu labels/order, static-page copy, and existing View filters/sorting require no
+theme rebuild. The current redactie/freelance/old-redactie collections and their
+headings/actions remain Drupal-owned.
+
+The theme now avoids numeric node and taxonomy IDs. Static designed pages are
+recognized by their stable aliases or titles (`visie`, `meewerken`,
+`adverteren`, and `contact`), Krom by the `tags` vocabulary and `krom` name, and
+the ten category controls by taxonomy labels/aliases. If an entity is recreated,
+reusing its established alias/name preserves its presentation.
+
+A developer is still needed when changing content-type or field machine names,
+renaming/replacing a View or menu machine name, adding a new specially designed
+page, or adding a navigation destination that needs new artwork. Those are site
+architecture changes rather than editorial content changes.

@@ -2,9 +2,17 @@ name: DWARS 2026
 type: theme
 description: 'Drupal-native implementation of the DWARS 2026 visual design.'
 package: DWARS
+version: 1.0.0
 core_version_requirement: ^11
 base theme: false
 generator: 'starterkit_theme:11.3.11'
+dependencies:
+  - drupal:block
+  - drupal:node
+  - drupal:search
+  - drupal:system
+  - drupal:taxonomy
+  - drupal:views
 libraries:
   - dwars2026/global
 regions:
