@@ -218,7 +218,8 @@
     gap: .1rem;
   }
 
-  .pager__item--page a {
+  .pager__item--page a,
+  .pager__item--page > span {
     display: grid;
     min-width: 2.15rem;
     height: 2.15rem;
@@ -230,10 +231,374 @@
     transition: color .2s ease, transform .2s ease;
   }
 
-  .pager__item--page.is-active a {
+  .pager__item--page.is-active a,
+  .pager__item--page.is-active > span {
     clip-path: polygon(4% 4%, 95% 0, 100% 12%, 97% 88%, 91% 100%, 5% 96%, 0 84%, 3% 13%);
     background: var(--color-dwars-pink);
     color: #fff;
+  }
+
+  #views-exposed-form-cultuuragenda-page-1 {
+    display: flex;
+    max-width: 38rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: .75rem;
+    margin-bottom: 2rem;
+  }
+
+  #views-exposed-form-cultuuragenda-page-1 .form-item {
+    min-width: 14rem;
+    flex: 1 1 18rem;
+  }
+
+  #views-exposed-form-cultuuragenda-page-1 label {
+    display: block;
+    margin-bottom: .35rem;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    letter-spacing: .05em;
+    text-transform: lowercase;
+  }
+
+  #views-exposed-form-cultuuragenda-page-1 select {
+    width: 100%;
+    border: 1px solid currentColor;
+    border-radius: 9999px;
+    background: transparent;
+    padding: .55rem 1rem;
+    font-family: var(--font-heading);
+    font-size: .95rem;
+    letter-spacing: .08em;
+    transition: border-color .2s ease;
+  }
+
+  #views-exposed-form-cultuuragenda-page-1 select:focus {
+    border-color: var(--color-dwars-pink);
+    outline: none;
+  }
+
+  #views-exposed-form-cultuuragenda-page-1 .form-actions {
+    flex: 0 0 auto;
+  }
+
+  #views-exposed-form-cultuuragenda-page-1 input[type="submit"] {
+    min-height: 3rem;
+    border: 0;
+    background-color: transparent;
+    background-image: url("../../assets/images/extra/tape-light.png");
+    background-position: center;
+    background-size: 100% 100%;
+    color: #111;
+    filter: drop-shadow(0 2px 2px rgb(0 0 0 / .2));
+    padding: .55rem 1.4rem;
+    transition: color .2s ease, transform .2s ease;
+  }
+
+  #views-exposed-form-cultuuragenda-page-1 input[type="submit"]:hover,
+  #views-exposed-form-cultuuragenda-page-1 input[type="submit"]:focus-visible {
+    color: var(--color-dwars-pink);
+    transform: translateY(-2px) rotate(-1deg);
+  }
+
+  .dwars-culture-label {
+    position: relative;
+    display: inline-block;
+    margin-bottom: .65rem;
+    padding: .2rem .75rem .25rem;
+    color: #111;
+    font-family: var(--font-heading);
+    font-size: 1.45rem;
+    letter-spacing: .06em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .dwars-culture-label::before {
+    position: absolute;
+    z-index: -1;
+    inset: -.15rem -.35rem;
+    background-image: url("../../assets/images/extra/tape-light.png");
+    background-position: center;
+    background-size: 100% 100%;
+    content: "";
+    transform: rotate(-1deg);
+  }
+
+  .dwars-culture-field:nth-child(even) > .dwars-culture-label::before {
+    transform: rotate(1deg);
+  }
+
+  .dwars-culture-field p,
+  .dwars-culture-field .field__item {
+    font-size: 1.05rem;
+    line-height: 1.65;
+  }
+
+  .dwars-culture-photo img {
+    margin-top: 1rem;
+    filter: grayscale(1);
+    transition: filter .35s ease;
+  }
+
+  .dwars-culture-photo:hover img {
+    filter: grayscale(0);
+  }
+
+  .dwars-culture-agenda__grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .dwars-culture-agenda__grid > .views-row {
+    min-width: 0;
+  }
+
+  .dwars-culture-card {
+    position: relative;
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    border: 1px solid var(--color-dwars-gray);
+    background: color-mix(in srgb, var(--background) 72%, transparent);
+    box-shadow: .45rem .45rem 0 color-mix(in srgb, var(--color-dwars-black) 13%, transparent);
+    padding: 1.5rem;
+    transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+  }
+
+  .dark .dwars-culture-card {
+    border-color: color-mix(in srgb, var(--foreground) 25%, transparent);
+    background: color-mix(in srgb, var(--color-dwars-black) 18%, transparent);
+    box-shadow: .45rem .45rem 0 color-mix(in srgb, var(--color-dwars-black) 30%, transparent);
+  }
+
+  .dwars-culture-card::before {
+    position: absolute;
+    top: -.35rem;
+    left: 1rem;
+    width: 4.75rem;
+    height: .65rem;
+    background: var(--color-dwars-pink);
+    clip-path: polygon(2% 12%, 98% 0, 100% 82%, 0 100%);
+    content: "";
+    transform: rotate(-2deg);
+  }
+
+  .dwars-culture-agenda__grid > .views-row:nth-child(even) .dwars-culture-card::before {
+    right: 1rem;
+    left: auto;
+    transform: rotate(2deg);
+  }
+
+  .dwars-culture-card:hover,
+  .dwars-culture-card:focus-within {
+    border-color: var(--color-dwars-pink);
+    box-shadow: .55rem .55rem 0 color-mix(in srgb, var(--color-dwars-pink) 25%, transparent);
+    transform: translateY(-3px) rotate(-.25deg);
+  }
+
+  .dwars-culture-card__title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3rem);
+    letter-spacing: .04em;
+    line-height: .95;
+    text-transform: uppercase;
+  }
+
+  .dwars-culture-card__title a {
+    transition: color .2s ease;
+  }
+
+  .dwars-culture-card:hover .dwars-culture-card__title a,
+  .dwars-culture-card__title a:focus-visible {
+    color: var(--color-dwars-pink);
+  }
+
+  .dwars-culture-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+    margin-top: 1.25rem;
+    border-top: 1px solid currentColor;
+    padding-top: .75rem;
+    font-family: var(--font-brother);
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  .dwars-culture-card__photo {
+    display: block;
+    overflow: hidden;
+    margin-top: 1.25rem;
+    background: var(--color-dwars-gray);
+  }
+
+  .dwars-culture-card__photo img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    filter: grayscale(1);
+    transition: filter .35s ease, transform .35s ease;
+  }
+
+  .dwars-culture-card:hover .dwars-culture-card__photo img {
+    filter: grayscale(0);
+    transform: scale(1.025);
+  }
+
+  .dwars-culture-card__more {
+    align-self: flex-start;
+    margin-top: auto;
+    padding-top: 1.25rem;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    letter-spacing: .06em;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    text-transform: uppercase;
+    transition: color .2s ease;
+  }
+
+  .dwars-culture-card__more:hover,
+  .dwars-culture-card__more:focus-visible {
+    color: var(--color-dwars-pink);
+  }
+
+  @media (min-width: 900px) {
+    .dwars-culture-agenda__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .dwars-404 {
+    position: relative;
+    width: min(100%, 58rem);
+    padding: clamp(1rem, 4vw, 2.5rem);
+  }
+
+  .dwars-404::before {
+    position: absolute;
+    inset: clamp(2rem, 5vw, 4rem) 0 0 clamp(2rem, 5vw, 4rem);
+    background: #000;
+    clip-path: polygon(2% 2%, 97% 0, 100% 8%, 98% 21%, 100% 35%, 97% 49%, 100% 66%, 98% 82%, 100% 100%, 4% 98%, 0 91%, 2% 75%, 0 58%, 3% 43%, 0 23%);
+    content: "";
+    transform: rotate(1.5deg);
+  }
+
+  .dwars-404__paper {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    background: #f3f3f3;
+    clip-path: polygon(1% 1%, 17% 0, 31% 2%, 48% 0, 66% 1%, 82% 0, 99% 2%, 98% 18%, 100% 34%, 98% 49%, 100% 64%, 97% 79%, 99% 98%, 81% 100%, 65% 98%, 48% 100%, 31% 98%, 14% 100%, 1% 98%, 2% 82%, 0 66%, 2% 49%, 0 33%, 2% 17%);
+    color: #111;
+    padding: clamp(2rem, 7vw, 5rem);
+    text-align: center;
+  }
+
+  .dwars-404__paper::after {
+    position: absolute;
+    top: 9%;
+    right: -8%;
+    width: 54%;
+    height: 2.4rem;
+    background: var(--color-dwars-pink);
+    clip-path: polygon(1% 12%, 98% 0, 100% 83%, 2% 100%);
+    content: "";
+    opacity: .92;
+    transform: rotate(13deg);
+  }
+
+  .dwars-404__eyebrow {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    transform: rotate(-2deg);
+  }
+
+  .dwars-404__number {
+    position: relative;
+    z-index: 1;
+    margin: .15em 0 0;
+    color: var(--color-dwars-pink);
+    font-family: var(--font-heading);
+    font-size: clamp(8rem, 28vw, 18rem);
+    letter-spacing: -.03em;
+    line-height: .72;
+    text-shadow: .035em .035em 0 #111;
+  }
+
+  .dwars-404__title {
+    position: relative;
+    z-index: 1;
+    margin-top: clamp(1.75rem, 4vw, 3rem);
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 6vw, 4rem);
+    letter-spacing: .04em;
+    line-height: .95;
+    text-transform: uppercase;
+  }
+
+  .dwars-404__copy {
+    position: relative;
+    z-index: 1;
+    max-width: 34rem;
+    margin: 1.25rem auto 0;
+    font-family: var(--font-brother);
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    font-weight: 650;
+    line-height: 1.55;
+  }
+
+  .dwars-404__actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .dwars-404__button {
+    display: inline-grid;
+    min-height: 3.25rem;
+    place-items: center;
+    background-image: url("../../assets/images/extra/tape-light.png");
+    background-position: center;
+    background-size: 100% 100%;
+    color: #111;
+    filter: drop-shadow(0 2px 2px rgb(0 0 0 / .2));
+    padding: .7rem 1.5rem;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    transition: color .2s ease, transform .2s ease;
+  }
+
+  .dwars-404__button--primary {
+    background-image: none;
+    background-color: #111;
+    clip-path: polygon(2% 5%, 98% 0, 100% 85%, 96% 100%, 3% 96%, 0 13%);
+    color: #fff;
+  }
+
+  .dwars-404__button:hover,
+  .dwars-404__button:focus-visible {
+    color: var(--color-dwars-pink);
+    transform: translateY(-2px) rotate(-1deg);
   }
 
   .pager__item--page:not(.is-active) a:hover,

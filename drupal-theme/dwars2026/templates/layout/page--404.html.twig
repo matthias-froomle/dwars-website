@@ -1,0 +1,23 @@
+<div class="flex min-h-screen w-full flex-col md:flex-row">
+  {% include '@dwars2026/components/mobile-header.html.twig' %}
+  {% include '@dwars2026/components/sidebar.html.twig' %}
+
+  <div class="dwars-page-frame">
+    <main id="main-content" class="flex w-full flex-1 items-center justify-center px-5 py-12 md:px-10 lg:px-16" tabindex="-1">
+      <section class="dwars-404" aria-labelledby="dwars-404-title">
+        <div class="dwars-404__paper">
+          <span class="dwars-404__eyebrow">{{ 'Verdwaald tussen de regels'|t }}</span>
+          <p class="dwars-404__number" aria-hidden="true">404</p>
+          <h1 id="dwars-404-title" class="dwars-404__title">{{ 'Deze pagina is afgescheurd.'|t }}</h1>
+          <p class="dwars-404__copy">{{ 'Misschien is ze verhuisd, geschrapt of gewoon een beetje dwars.'|t }}</p>
+          <nav class="dwars-404__actions" aria-label="{{ 'Useful links'|t }}">
+            <a href="{{ dwars_home_url }}" class="dwars-404__button dwars-404__button--primary">{{ 'Naar de voorpagina'|t }}</a>
+            <a href="{{ dwars_archive_url }}" class="dwars-404__button">{{ 'Lees onze artikels'|t }}</a>
+          </nav>
+        </div>
+      </section>
+    </main>
+
+    {% include '@dwars2026/components/copyright-corner.html.twig' %}
+  </div>
+</div>

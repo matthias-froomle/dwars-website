@@ -41,6 +41,12 @@ function dwars2026_preprocess_page(array &$variables): void {
   $variables['dwars_search_url'] = Url::fromRoute('search.view_node_search', [], [
     'language' => \Drupal::languageManager()->getCurrentLanguage(),
   ])->toString();
+  $variables['dwars_home_url'] = Url::fromRoute('<front>', [], [
+    'language' => \Drupal::languageManager()->getCurrentLanguage(),
+  ])->toString();
+  $variables['dwars_archive_url'] = Url::fromRoute('view.alle_artikels.page_1', [], [
+    'language' => \Drupal::languageManager()->getCurrentLanguage(),
+  ])->toString();
 
   $variables['dwars_navigation'] = _dwars2026_navigation();
 
@@ -318,7 +324,8 @@ function dwars2026_preprocess_views_view(array &$variables): void {
     $variables['dwars_archive_is_search'] = FALSE;
     return;
   }
-  if ($view->id() !== 'redactie') {
+  $redactie_view_ids = ['redactie', 'freelance', 'oud_redactie'];
+  if (!in_array($view->id(), $redactie_view_ids, TRUE)) {
     return;
   }
 
@@ -341,6 +348,16 @@ function dwars2026_preprocess_views_view(array &$variables): void {
         ];
       }
     }
+  }
+
+  if ($variables['dwars_redactie_title'] === '') {
+    $variables['dwars_redactie_title'] = (string) $view->getTitle();
+  }
+
+  // Freelance and former editors use Drupal's configured rows. Only the
+  // current editorial team needs the additional role-based visual grouping.
+  if ($view->id() !== 'redactie') {
+    return;
   }
 
   $groups = [
@@ -423,12 +440,33 @@ function dwars2026_preprocess_form(array &$variables): void {
 }
 
 /**
+ * Implements hook_preprocess_input().
+ */
+function dwars2026_preprocess_input(array &$variables): void {
+  $public_filter_submit_ids = [
+    'edit-submit-cultuuragenda',
+    'edit-submit-fotograaf',
+  ];
+  if (in_array($variables['element']['#id'] ?? '', $public_filter_submit_ids, TRUE)) {
+    if ($variables['attributes'] instanceof \Drupal\Core\Template\Attribute) {
+      $variables['attributes']->setAttribute('value', (string) t('Toepassen'));
+    }
+    else {
+      $variables['attributes']['value'] = (string) t('Toepassen');
+    }
+  }
+}
+
+/**
  * Implements hook_theme_suggestions_page_alter().
  */
 function dwars2026_theme_suggestions_page_alter(array &$suggestions, array $variables): void {
   $route = \Drupal::routeMatch()->getRouteName();
-  if ($route === 'view.redactie.page_1') {
+  if (in_array($route, ['view.redactie.page_1', 'view.freelance.page_1', 'view.oud_redactie.page_1'], TRUE)) {
     $suggestions[] = 'page__redactie';
+  }
+  if ($route === 'system.404') {
+    $suggestions[] = 'page__404';
   }
   if ($route === 'view.archive.page_1') {
     $suggestions[] = 'page__archive';

@@ -1,0 +1,45 @@
+{% if page %}
+  <article{{ attributes.addClass('dwars-culture-detail', 'mx-auto', 'max-w-4xl') }}>
+    {{ title_prefix }}
+    <h1{{ title_attributes.addClass('mb-10', 'font-heading', 'text-5xl', 'uppercase', 'leading-none', 'tracking-wide', 'md:text-7xl') }}>{{ label }}</h1>
+    {{ title_suffix }}
+
+    <div{{ content_attributes.addClass('space-y-10') }}>
+      <div class="grid gap-6 sm:grid-cols-2">
+        {% if node.field_locatie.value %}
+          <section class="dwars-culture-field">
+            <h2 class="dwars-culture-label">{{ 'Locatie'|t }}</h2>
+            <p>{{ node.field_locatie.value }}</p>
+          </section>
+        {% endif %}
+        {% if node.field_datum.value %}
+          <section class="dwars-culture-field">
+            <h2 class="dwars-culture-label">{{ 'Datum'|t }}</h2>
+            <p>{{ node.field_datum.value }}</p>
+          </section>
+        {% endif %}
+      </div>
+      {% if content.field_beschrijving %}<div class="dwars-prose">{{ content.field_beschrijving }}</div>{% endif %}
+      {% if content.field_links %}<div class="dwars-culture-field dwars-prose">{{ content.field_links }}</div>{% endif %}
+      {% if content.field_foto %}
+        <section class="dwars-culture-field dwars-culture-photo">
+          <h2 class="dwars-culture-label">{{ 'Foto'|t }}</h2>
+          {{ content.field_foto.0 }}
+        </section>
+      {% endif %}
+      {{ content|without('field_locatie', 'field_datum', 'field_beschrijving', 'field_links', 'field_foto') }}
+    </div>
+  </article>
+{% else %}
+  <article{{ attributes.addClass('dwars-culture-card') }}>
+    {{ title_prefix }}
+    <h2{{ title_attributes.addClass('dwars-culture-card__title') }}><a href="{{ url }}">{{ label }}</a></h2>
+    {{ title_suffix }}
+    <div class="dwars-culture-card__meta">
+      {% if node.field_locatie.value %}<span>{{ node.field_locatie.value }}</span>{% endif %}
+      {% if node.field_datum.value %}<span>{{ node.field_datum.value }}</span>{% endif %}
+    </div>
+    {% if content.field_foto %}<a href="{{ url }}" class="dwars-culture-card__photo">{{ content.field_foto.0 }}</a>{% endif %}
+    <a href="{{ url }}" class="dwars-culture-card__more">{{ 'Lees meer'|t }}</a>
+  </article>
+{% endif %}
