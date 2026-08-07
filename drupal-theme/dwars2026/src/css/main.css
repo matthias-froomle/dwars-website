@@ -1053,8 +1053,36 @@
 
 .bg-tape {
   position: relative;
-  background: #f0f0f0;
+  background-color: #f0f0f0;
   box-shadow: 0 1px 3px rgb(0 0 0 / .1);
+}
+
+.bg-tape::before,
+.bg-tape::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: currentColor;
+  content: "";
+  opacity: .1;
+  pointer-events: none;
+}
+
+.bg-tape::before {
+  left: -3px;
+  transform: rotate(-3deg);
+}
+
+.bg-tape::after {
+  right: -3px;
+  transform: rotate(3deg);
+}
+
+a.bg-tape:hover,
+a.bg-tape:focus-visible {
+  background-color: var(--color-dwars-pink);
+  color: #fff;
 }
 
 .dwars-article-prose h3 {
