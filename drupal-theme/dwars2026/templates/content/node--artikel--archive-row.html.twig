@@ -1,7 +1,7 @@
 <article{{ attributes.addClass('group', 'mb-12', 'flex', 'items-start', 'gap-6') }}>
   {% if dwars_has_photo %}<a href="{{ url }}" class="dwars-card-image relative w-1/3 shrink-0 cursor-pointer overflow-hidden grayscale transition-all duration-500 hover:grayscale-0"><span class="block aspect-video w-full bg-dwars-gray">{{ dwars_article_image }}</span></a>{% endif %}
   <div class="flex min-w-0 flex-1 flex-col">
-    <a href="{{ url }}" class="transition-colors hover:text-dwars-pink"><h2 class="mb-2 font-heading text-2xl uppercase leading-tight tracking-wide text-white transition-colors group-hover:text-dwars-pink md:text-black dark:text-white">{{ label }}</h2></a>
-    {% if dwars_excerpt %}<p class="line-clamp-3 text-sm leading-relaxed text-gray-300 transition-colors md:text-black dark:text-gray-400">{{ dwars_excerpt }}</p>{% endif %}
+    <a href="{{ url }}" class="transition-colors hover:text-dwars-pink"><h2 class="mb-2 font-heading text-2xl uppercase leading-tight tracking-wide text-black transition-colors group-hover:text-dwars-pink dark:text-white">{{ label }}</h2></a>
+    {% if dwars_excerpt %}<p class="line-clamp-3 text-sm leading-relaxed text-black transition-colors dark:text-gray-400">{{ dwars_excerpt }}</p>{% endif %}
   </div>
 </article>

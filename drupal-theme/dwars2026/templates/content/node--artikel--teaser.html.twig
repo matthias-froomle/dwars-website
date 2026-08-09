@@ -1,4 +1,4 @@
-<article{{ attributes.addClass('group', 'relative', 'mb-6', 'break-inside-avoid', 'border-b-2', 'border-white', 'pb-4', 'transition-all', 'duration-300', 'md:border-black', 'dark:border-white') }}>
+<article{{ attributes.addClass('group', 'relative', 'mb-6', 'break-inside-avoid', 'border-b-2', 'border-black', 'pb-4', 'transition-all', 'duration-300', 'dark:border-white') }}>
   {{ title_prefix }}
   <a href="{{ dwars_node_url }}" class="relative block h-full w-full">
     {% if dwars_has_photo and dwars_card_variant != 'text' %}
@@ -9,8 +9,8 @@
       </div>
     {% else %}
       <div class="mb-2 py-2 transition-colors group-hover:bg-white/5 md:group-hover:bg-black/5 dark:group-hover:bg-white/5">
-        <h2{{ title_attributes.addClass('mb-3', 'font-heading', 'text-xl', 'uppercase', 'leading-tight', 'tracking-wide', 'text-white', 'transition-colors', 'group-hover:text-dwars-pink', 'md:text-2xl', 'md:text-black', 'dark:text-white') }}>{{ label }}</h2>
-        {% if dwars_excerpt %}<p class="text-sm font-medium leading-snug text-gray-300 transition-colors md:text-base md:text-black dark:text-gray-300">{{ dwars_excerpt }}</p>{% endif %}
+        <h2{{ title_attributes.addClass('mb-3', 'font-heading', 'text-xl', 'uppercase', 'leading-tight', 'tracking-wide', 'text-black', 'transition-colors', 'group-hover:text-dwars-pink', 'md:text-2xl', 'dark:text-white') }}>{{ label }}</h2>
+        {% if dwars_excerpt %}<p class="text-sm font-medium leading-snug text-black transition-colors md:text-base dark:text-gray-300">{{ dwars_excerpt }}</p>{% endif %}
       </div>
     {% endif %}
   </a>

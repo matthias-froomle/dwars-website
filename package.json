@@ -10,7 +10,7 @@
     "theme:install": "npm --prefix drupal-theme/dwars2026 install",
     "theme:build": "npm --prefix drupal-theme/dwars2026 run build",
     "theme:check": "npm --prefix drupal-theme/dwars2026 run check",
-    "theme:verify-local": "node scripts/verify-theme-local.mjs",
+    "theme:verify-local": "playwright test --config=playwright.config.mjs",
     "theme:package": "npm --prefix drupal-theme/dwars2026 run package",
     "theme:deploy:production": "bash scripts/deploy-theme-production.sh",
     "editions:package": "./scripts/package-editions.sh"
@@ -21,6 +21,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@playwright/test": "1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

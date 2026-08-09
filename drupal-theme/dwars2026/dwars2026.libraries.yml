@@ -1,5 +1,5 @@
 global:
-  version: 1.0.5
+  version: 1.0.6
   css:
     theme:
       dist/css/main.css: { minified: true }

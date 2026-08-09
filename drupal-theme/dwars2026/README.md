@@ -4,7 +4,7 @@
 the Next.js application in this repository. Production runs this native theme;
 it does not need Next.js, React, JSON:API, Node.js, or Vercel at runtime.
 
-The current theme release is `1.0.5`.
+The current theme release is `1.0.6`.
 
 ## Ownership boundary
 
@@ -46,10 +46,16 @@ icons, and `aria-pressed` state synchronized.
 - `src/js/dwars.js`: plain Drupal behaviors for modes, menus, image fallbacks,
   and Krom interaction.
 - `assets/`: packaged fonts, icons, logos, category labels, and paper textures.
+- `favicon.ico`: multi-resolution DWARS browser icon used by Drupal's
+  default-favicon setting; it prevents fallback to the Drupal core icon.
+- `assets/images/favicon-master.png`: three-colour source master for rebuilding
+  the favicon without reusing a legacy or platform logo.
 - `config/install/`: block placements installed when the theme is first enabled.
 - `scripts/check-theme.mjs`: release contract, PHP, JavaScript, asset, and
   prototype-content checks.
 - `scripts/package-theme.mjs`: reproducible deployable archive and checksum.
+- `../../tests/e2e/`: Playwright route, theme-mode, interaction, and optional
+  authenticated acceptance tests.
 
 ## Build and validate
 
@@ -84,9 +90,15 @@ ddev drush cache:rebuild
 npm run theme:verify-local
 ```
 
-The browser sweep covers representative public routes at desktop dark, desktop
-light, and mobile sizes. An authenticated sweep can be added with a local
-one-time editor login URL:
+The Playwright sweep launches an isolated headless Chromium and covers 19
+representative public routes in desktop and phone layouts in both light and
+dark mode. It also checks automatic system-mode selection, manual persistence,
+responsive overflow, runtime errors, key hover interactions, readable
+phone-layout colours, and the packaged favicon. Install its browser once with
+`npx playwright install chromium` if it is not already available. Failure
+screenshots and traces are written below the ignored `test-results/` directory.
+
+An authenticated sweep can be added with a local one-time editor login URL:
 
 ```bash
 DWARS_AUTH_ONLY=1 \

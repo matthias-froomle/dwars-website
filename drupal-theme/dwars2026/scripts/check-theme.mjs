@@ -8,6 +8,8 @@ const required = [
   'dwars2026.info.yml',
   'dwars2026.libraries.yml',
   'dwars2026.theme',
+  'favicon.ico',
+  'assets/images/favicon-master.png',
   'dist/css/main.css',
   'src/js/dwars.js',
   'assets/fonts/Veneer Three.ttf',

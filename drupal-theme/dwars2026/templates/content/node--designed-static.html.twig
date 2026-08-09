@@ -3,7 +3,7 @@
     {% include '@dwars2026/components/section-header.html.twig' with { title: dwars_designed_page.title } %}
     <div{{ content_attributes.addClass('dwars-designed-content', 'dwars-designed-content--' ~ dwars_designed_page.key, 'mt-12') }}>
       {% if dwars_designed_page.key == 'contact' and dwars_contact %}
-        <section class="dwars-contact-general border-2 border-white bg-dwars-gray/10 p-8 transition-colors md:border-black dark:border-gray-500 dark:bg-gray-800">
+        <section class="dwars-contact-general border-2 border-black bg-dwars-gray/10 p-8 transition-colors dark:border-gray-500 dark:bg-gray-800">
           {% if dwars_contact.general_lines %}
             {% for line in dwars_contact.general_lines|slice(0, 3) %}
               {% if loop.first %}

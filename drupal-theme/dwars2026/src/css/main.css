@@ -99,25 +99,6 @@
   }
 }
 
-@media (max-width: 767px) {
-  body {
-    background: #000;
-    color: #fff;
-  }
-}
-
-@media (min-width: 768px) {
-  body {
-    background: #fff;
-    color: #000;
-  }
-
-  .dark body {
-    background: #222;
-    color: #f3f4f6;
-  }
-}
-
 @layer components {
   .dwars-page-frame {
     position: relative;
@@ -921,7 +902,10 @@
 .dwars-mobile-overlay[data-open="false"] {
   pointer-events: none;
   opacity: 0;
-  transform: translate(3rem, -3rem) scale(.95);
+  /* Keep the closed panel inside the viewport. A positive horizontal
+   * translation still contributes to the document scroll width even while
+   * the panel is transparent. */
+  transform: translate(0, -3rem) scale(.95);
 }
 
 /* Drupal core defines an unlayered `.hidden` utility which wins over
@@ -1029,6 +1013,26 @@
 }
 
 .dwars-redactie-photo img { object-fit: cover; }
+
+/* The freelance and former-editor Views use Drupal's fixed four-column grid
+ * markup. Reflow those CMS rows on phones so real names and role labels cannot
+ * expand the document beyond the viewport. */
+:is(.view-freelance, .view-oud-redactie) .views-view-grid.horizontal .views-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+:is(.view-freelance, .view-oud-redactie) .views-view-grid.horizontal .views-col {
+  width: auto !important;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  :is(.view-freelance, .view-oud-redactie) .views-view-grid.horizontal .views-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
 
 .dwars-archive-header h2 {
   font-family: var(--font-heading);

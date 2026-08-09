@@ -350,7 +350,7 @@ DWARS_REMOTE_POSTCHECK
 
 DWARS_LOCAL_ORIGIN=https://dwars.be \
 DWARS_VERIFY_OUTPUT="/private/tmp/dwars-theme-production-$dwars_version.json" \
-node scripts/verify-theme-local.mjs
+npm run theme:verify-local
 
 dwars_complete=1
 trap - EXIT INT TERM

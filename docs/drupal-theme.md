@@ -82,19 +82,24 @@ npm run theme:build
 ddev drush cache:rebuild
 ```
 
-With the persistent local Chromium debug session running on port 9222, execute
-the repeatable production acceptance sweep:
+Install Playwright's isolated test browser once, then execute the repeatable
+production acceptance sweep:
 
 ```bash
+npx playwright install chromium
 npm run theme:verify-local
 ```
 
-It checks 19 representative Drupal routes in desktop dark, desktop light, and
-mobile dark modes, including HTTP status, expected page components, the shared
-footer, responsive navigation shell, horizontal overflow, browser errors, the
-Dutch culture-filter label, and the real 404 response. Missing-resource requests
-are recorded separately because the local restore intentionally excludes the
-production public-upload tree; JavaScript/runtime errors still fail the check.
+The Playwright suite checks 19 representative Drupal routes in desktop dark,
+desktop light, phone dark, and phone light modes, including HTTP status,
+expected page components, the shared footer, responsive navigation shell,
+horizontal overflow, browser errors, the Dutch culture-filter label, and the
+real 404 response. It separately verifies automatic browser/OS mode selection,
+manual persisted choices, and designed hover/image behavior. Missing-resource
+requests are attached as evidence because the local restore intentionally
+excludes the production public-upload tree; JavaScript/runtime errors still
+fail the check. Failure screenshots, traces, and the JSON report live under the
+ignored `test-results/` directory by default.
 
 Check at minimum the Dutch homepage, an article, archive, editorial staff,
 static pages, search, taxonomy/Krom, mobile navigation, dark mode, pager, and an
