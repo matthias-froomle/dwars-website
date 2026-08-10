@@ -62,12 +62,20 @@ icons, and `aria-pressed` state synchronized.
 From the repository root:
 
 ```bash
+npm ci
+npx playwright install chromium
 npm run theme:install
 npm run theme:build
 npm run theme:check
 npm run theme:verify-local
 npm run theme:package
 ```
+
+`npm ci` installs the pinned `@playwright/test` package from `package-lock.json`.
+The separate `npx playwright install chromium` command downloads the matching
+isolated browser binary; run it once on a new machine and again after a
+Playwright version change. On a minimal Linux CI host, use `npx playwright
+install --with-deps chromium` when system browser libraries are not installed.
 
 `theme:package` writes:
 
@@ -94,17 +102,26 @@ The Playwright sweep launches an isolated headless Chromium and covers 19
 representative public routes in desktop and phone layouts in both light and
 dark mode. It also checks automatic system-mode selection, manual persistence,
 responsive overflow, runtime errors, key hover interactions, readable
-phone-layout colours, and the packaged favicon. Install its browser once with
-`npx playwright install chromium` if it is not already available. Failure
-screenshots and traces are written below the ignored `test-results/` directory.
+phone-layout colours, and the packaged favicon. Failure screenshots and traces
+are written below the ignored `test-results/` directory.
 
-An authenticated sweep can be added with a local one-time editor login URL:
+An authenticated sweep can be added with a fresh local one-time login URL. The
+following command generates and consumes the URL without opening it in your
+normal browser:
 
 ```bash
 DWARS_AUTH_ONLY=1 \
-DWARS_LOGIN_URL='<local-one-time-login-url>' \
+DWARS_LOGIN_URL="$(ddev drush uli --uid=1 \
+  --uri=http://dwars-drupal.ddev.site \
+  --no-browser)" \
 npm run theme:verify-local
 ```
+
+UID 1 is convenient for testing presentation. To exercise representative
+editor permissions instead, replace `--uid=1` with `--name=EDITOR_USERNAME`;
+that account must be allowed to open all five authenticated editorial Views.
+Generate a new URL for every run and do not visit it manually first, because a
+Drupal one-time login URL can only be consumed once.
 
 The complete restore and acceptance workflow is documented in
 `docs/drupal-theme.md` in the repository root.
