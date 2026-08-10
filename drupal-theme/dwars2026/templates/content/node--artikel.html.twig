@@ -2,7 +2,7 @@
   <div class="mx-auto w-full max-w-4xl flex-1 p-6 md:p-12 md:pr-6">
     {% if dwars_article_image %}<div class="dwars-article-image relative -ml-[5%] mb-12 aspect-[21/9] w-[110%] overflow-hidden bg-dwars-gray grayscale transition-all duration-700 hover:grayscale-0 dark:bg-gray-800">{{ dwars_article_image }}</div>{% endif %}
     {% if dwars_tape_tags %}<div class="mb-8 flex flex-wrap gap-4">{% for tag in dwars_tape_tags %}<a href="{{ tag.url }}" class="bg-tape inline-flex items-center px-3 py-1 font-heading text-sm uppercase tracking-wider text-dwars-text transition-colors hover:bg-dwars-pink hover:text-white">{{ tag.label }}</a>{% endfor %}</div>{% endif %}
-    <h1{{ title_attributes.addClass('mb-8', 'px-2', 'font-heading', 'text-6xl', 'uppercase', 'leading-tight', 'tracking-wide', 'drop-shadow-sm', 'transition-colors', 'dark:text-white') }}>{{ label }}</h1>
+    <h1{{ title_attributes.addClass('mb-8', 'break-words', 'px-2', 'font-heading', 'text-6xl', 'uppercase', 'leading-tight', 'tracking-wide', 'drop-shadow-sm', 'transition-colors', 'dark:text-white') }}>{{ label }}</h1>
     {% if content.field_inleiding %}<div class="mb-8 text-xl font-bold leading-relaxed dark:text-gray-200">{{ content.field_inleiding }}</div>{% endif %}
     <div class="mb-12 border-b-2 border-dashed border-gray-600 pb-4 text-sm font-bold uppercase tracking-widest md:border-gray-300 dark:border-gray-600">
       <time datetime="{{ node.getCreatedTime|date('c') }}">{{ dwars_published }}</time>{% if dwars_article_authors %} — {% for author in dwars_article_authors %}<a href="{{ author.url }}" class="transition-colors hover:text-dwars-pink">{{ author.label }}</a>{{ not loop.last ? ', ' }}{% endfor %}{% elseif dwars_author_external %} — {{ dwars_author_external }}{% endif %}

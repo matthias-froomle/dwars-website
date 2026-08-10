@@ -4,7 +4,7 @@
 the Next.js application in this repository. Production runs this native theme;
 it does not need Next.js, React, JSON:API, Node.js, or Vercel at runtime.
 
-The current theme release is `1.0.6`.
+The current theme release is `1.0.7`.
 
 ## Ownership boundary
 

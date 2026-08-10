@@ -38,6 +38,22 @@ test.describe('DWARS visual interactions', () => {
         expect(frame.objectFit).toBe('cover');
       }
     }
+
+    const relatedTitle = page.locator('.dwars-related-articles article a > span:last-child').first();
+    await relatedTitle.evaluate((element) => {
+      element.textContent = 'VICERECTOR CHRIS VAN GINNEKEN OVER INCLUSIEVERE ONDERWIJS- EN EXAMENMAATREGELEN';
+    });
+    const relatedBounds = await relatedTitle.evaluate((element) => {
+      const titleRect = element.getBoundingClientRect();
+      const rowRect = element.parentElement.getBoundingClientRect();
+      return {
+        titleOverflow: element.scrollWidth - element.clientWidth,
+        titleRight: titleRect.right,
+        rowRight: rowRect.right,
+      };
+    });
+    expect(relatedBounds.titleOverflow).toBeLessThanOrEqual(1);
+    expect(relatedBounds.titleRight).toBeLessThanOrEqual(relatedBounds.rowRight + 1);
     expect(await page.locator('.dwars-article-aside').evaluate((aside) => aside.scrollWidth - aside.clientWidth)).toBeLessThanOrEqual(1);
   });
 
@@ -50,5 +66,20 @@ test.describe('DWARS visual interactions', () => {
     const image = page.locator('.dwars-category-label img[alt="opinie"]:visible').first();
     await image.locator('..').hover();
     await expect.poll(() => image.evaluate((element) => getComputedStyle(element).filter)).toContain('dwars-category-pink');
+  });
+
+  test('long Drupal article titles wrap within a phone viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await seedTheme(page, 'dark');
+    await gotoPath(page, '/nl/node/80992');
+
+    const title = page.locator('article h1').first();
+    await title.evaluate((element) => {
+      element.textContent = 'VICERECTOR CHRIS VAN GINNEKEN OVER INCLUSIEVERE ONDERWIJS- EN EXAMENMAATREGELEN';
+    });
+
+    expect(await title.evaluate((element) => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1);
+    expect(await page.evaluate(() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth)).toBeLessThanOrEqual(1);
   });
 });
