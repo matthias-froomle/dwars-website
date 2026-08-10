@@ -32,18 +32,19 @@ Views when supplied a fresh one-time login URL. For the local DDEV restore, the
 complete copy-paste command is:
 
 ```bash
+DWARS_EDITOR_USERNAME='EDITOR_USERNAME'
 DWARS_AUTH_ONLY=1 \
-DWARS_LOGIN_URL="$(ddev drush uli --uid=1 \
+DWARS_LOGIN_URL="$(ddev drush uli --name="$DWARS_EDITOR_USERNAME" \
   --uri=http://dwars-drupal.ddev.site \
   --no-browser)" \
 npm run theme:verify-local
 ```
 
 The command generates the URL without opening it and lets Playwright consume it
-immediately. Do not open the URL manually first. UID 1 is useful for a pure
-theme check; replace `--uid=1` with `--name=EDITOR_USERNAME` to test the actual
-permissions of an editor who can access `credits`, `fotograaf`, `tags`,
-`meewerken-lijst`, and `reserve`. Generate a new URL for every run.
+immediately. Choose an active editor who can access `credits`, `fotograaf`,
+`tags`, `meewerken-lijst`, and `reserve`; restored snapshots may keep UID 1
+blocked. Do not open the URL manually first, and generate a new URL for every
+run.
 
 Failure screenshots and retained traces are stored below `test-results/`, which
 is intentionally ignored by Git.

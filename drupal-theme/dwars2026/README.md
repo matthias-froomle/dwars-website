@@ -110,18 +110,18 @@ following command generates and consumes the URL without opening it in your
 normal browser:
 
 ```bash
+DWARS_EDITOR_USERNAME='EDITOR_USERNAME'
 DWARS_AUTH_ONLY=1 \
-DWARS_LOGIN_URL="$(ddev drush uli --uid=1 \
+DWARS_LOGIN_URL="$(ddev drush uli --name="$DWARS_EDITOR_USERNAME" \
   --uri=http://dwars-drupal.ddev.site \
   --no-browser)" \
 npm run theme:verify-local
 ```
 
-UID 1 is convenient for testing presentation. To exercise representative
-editor permissions instead, replace `--uid=1` with `--name=EDITOR_USERNAME`;
-that account must be allowed to open all five authenticated editorial Views.
-Generate a new URL for every run and do not visit it manually first, because a
-Drupal one-time login URL can only be consumed once.
+Select an active account that can open all five authenticated editorial Views.
+Do not assume UID 1 is usable: restored snapshots may retain that account in a
+blocked state. Generate a new URL for every run and do not visit it manually
+first, because a Drupal one-time login URL can only be consumed once.
 
 The complete restore and acceptance workflow is documented in
 `docs/drupal-theme.md` in the repository root.

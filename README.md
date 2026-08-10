@@ -36,15 +36,17 @@ Run only the authenticated editorial acceptance checks with a fresh local
 one-time login URL:
 
 ```bash
+DWARS_EDITOR_USERNAME='EDITOR_USERNAME'
 DWARS_AUTH_ONLY=1 \
-DWARS_LOGIN_URL="$(ddev drush uli --uid=1 \
+DWARS_LOGIN_URL="$(ddev drush uli --name="$DWARS_EDITOR_USERNAME" \
   --uri=http://dwars-drupal.ddev.site \
   --no-browser)" \
 npm run theme:verify-local
 ```
 
-Do not open that URL manually first. Replace `--uid=1` with
-`--name=EDITOR_USERNAME` to test a real editor's permissions. Full local restore,
+Choose an active local account that can access all five editorial Views; do not
+assume UID 1 is usable, because restored snapshots may keep that account
+blocked. Do not open the generated URL manually first. Full local restore,
 testing, and production-release instructions are in
 [`docs/drupal-theme.md`](docs/drupal-theme.md),
 [`tests/e2e/README.md`](tests/e2e/README.md), and
