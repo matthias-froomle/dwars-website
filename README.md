@@ -52,6 +52,33 @@ testing, and production-release instructions are in
 [`tests/e2e/README.md`](tests/e2e/README.md), and
 [`docs/production-release-checklist.md`](docs/production-release-checklist.md).
 
+## Local Froomle Items pilot
+
+The restored local Drupal site can use the production `dwars/article` Froomle
+target. Calculating an item selection is local and read-only, but confirming a
+synchronization sends Items API requests. Never confirm a selection merely to
+test the interface.
+
+Before an agreed Items lifecycle or catalogue test, verify that the source,
+Composer staging directory and installed Drupal package are identical and that
+no unexpected work is pending:
+
+```bash
+./scripts/verify-froomle-items-readiness.sh
+```
+
+For a deliberately prepared one-item editorial test, declare the only expected
+pending entity and generation:
+
+```bash
+./scripts/verify-froomle-items-readiness.sh --expect-pending ENTITY_ID:GENERATION
+```
+
+The gate permits completed catalogue-synchronization history and terminal
+recovery wake-ups, but blocks unfinished jobs, unresolved job items, pending
+delivery work, undeclared editorial work, package drift and Drupal database
+updates. It never processes a queue or calls Froomle.
+
 ## Next.js visual prototype
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with
