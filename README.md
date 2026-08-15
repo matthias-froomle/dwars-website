@@ -76,8 +76,10 @@ pending entity and generation:
 
 The gate permits completed catalogue-synchronization history and terminal
 recovery wake-ups, but blocks unfinished jobs, unresolved job items, pending
-delivery work, undeclared editorial work, package drift and Drupal database
-updates. It never processes a queue or calls Froomle.
+delivery work, undeclared editorial work, package drift, Drupal database
+updates and mappings that still require explicit reconciliation. It also
+requires the referenced-content dependency services and table. It never
+processes a queue or calls Froomle.
 
 After the gate reports `READY`, exercise the installed mapping-lifecycle
 contract without contacting Froomle:
@@ -92,7 +94,8 @@ it creates, and removes its mapping, content, jobs, state and mock OAuth token
 on exit. It verifies identity locking, policy-only saves, explicit previewed
 reconciliation, changed-payload upserts and stale-item disables.
 
-For a deliberate catalogue-scale no-op test against the restored DWARS data,
+For a deliberate catalogue-scale no-op test or required dependency-index
+bootstrap against the restored DWARS data,
 first run the read-only payload/operation preflight:
 
 ```bash

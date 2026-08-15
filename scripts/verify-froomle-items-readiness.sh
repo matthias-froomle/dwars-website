@@ -99,6 +99,9 @@ if ! service_state="$(
     $checks = [
       "automatic_sync_subscriber" => \Drupal::hasService("froomle_items.automatic_sync_subscriber"),
       "backfill_batch_runner" => \Drupal::hasService("froomle_items.backfill_batch_runner"),
+      "dependency_repository" => \Drupal::hasService("froomle_items.dependency_repository"),
+      "dependency_invalidator" => \Drupal::hasService("froomle_items.dependency_invalidator"),
+      "dependency_table" => \Drupal::database()->schema()->tableExists("froomle_items_dependency"),
       "editorial_queue_worker" => isset($definitions["froomle_items_sync"]),
       "backfill_queue_worker" => isset($definitions["froomle_items_backfill_sync"]),
       "automatic_delivery" => \Drupal::config("froomle_items.settings")->get("automatic_delivery") === TRUE,
@@ -112,7 +115,7 @@ if ! service_state="$(
   failed=1
 fi
 
-for service_check in automatic_sync_subscriber backfill_batch_runner editorial_queue_worker backfill_queue_worker automatic_delivery; do
+for service_check in automatic_sync_subscriber backfill_batch_runner dependency_repository dependency_invalidator dependency_table editorial_queue_worker backfill_queue_worker automatic_delivery; do
   if grep -qx "$service_check=1" <<<"$service_state"; then
     echo "PASS active Drupal container: $service_check"
   else
@@ -120,6 +123,29 @@ for service_check in automatic_sync_subscriber backfill_batch_runner editorial_q
     failed=1
   fi
 done
+
+reconciliation_state=""
+if ! reconciliation_state="$(
+    cd "$project_dir"
+    ddev drush php:eval '
+    $lifecycle = \Drupal::service("froomle_items.mapping_lifecycle");
+    $required = [];
+    foreach (\Drupal::entityTypeManager()->getStorage("froomle_item_mapping")->loadMultiple() as $mapping) {
+      if ($mapping->status() && $lifecycle->requiresReconciliation($mapping)) {
+        $required[] = $mapping->id();
+      }
+    }
+    print implode(",", $required);
+  '
+)"; then
+  echo "FAIL could not inspect mapping reconciliation requirements" >&2
+  failed=1
+elif [[ -n "$reconciliation_state" ]]; then
+  echo "FAIL mappings require explicit reconciliation: $reconciliation_state" >&2
+  failed=1
+else
+  echo "PASS no mapping reconciliation is required"
+fi
 
 database_updates=""
 database_update_status=0

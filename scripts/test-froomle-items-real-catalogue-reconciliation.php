@@ -9,7 +9,7 @@ use GuzzleHttp\Client;
 use Psr\Http\Message\RequestInterface;
 
 /**
- * Reconciles the real local catalogue through a payload-equivalent mapping.
+ * Reconciles the real local catalogue through an unchanged or equivalent mapping.
  *
  * The default invocation is read-only and preflights every current/known item:
  *
@@ -19,10 +19,11 @@ use Psr\Http\Message\RequestInterface;
  *
  *   ddev exec env FROOMLE_NOOP_APPLY=1 drush php:script /var/www/html/scripts/test-froomle-items-real-catalogue-reconciliation.php
  *
- * The first applied run adds an impossible scalar fallback before title.value;
- * the second restores title.value exactly. Both runs replace Drupal's HTTP
- * client with a fail-closed handler and abort unless every planned Items
- * operation is empty before the mapping is saved.
+ * When the installed module has explicitly requested dependency-index
+ * population, the mapping remains unchanged. Otherwise the first applied run
+ * adds an impossible scalar fallback before title.value and the second restores
+ * title.value exactly. Every mode replaces Drupal's HTTP client with a
+ * fail-closed handler and aborts unless every planned Items operation is empty.
  */
 
 const FROOMLE_MAPPING_ID = 'dwars_articles';
@@ -44,6 +45,11 @@ $check = static function (bool $condition, string $message): void {
   }
   print "PASS {$message}\n";
 };
+$assert = static function (bool $condition, string $message): void {
+  if (!$condition) {
+    throw new RuntimeException($message);
+  }
+};
 
 foreach ([
   SyncRepository::QUEUE_NAME,
@@ -54,7 +60,13 @@ foreach ([
 }
 
 $lifecycle = \Drupal::service('froomle_items.mapping_lifecycle');
-$check(!$lifecycle->requiresReconciliation($mapping), 'mapping starts without a reconciliation requirement');
+$dependencyBootstrap = $lifecycle->requiresReconciliation($mapping);
+$check(
+  $dependencyBootstrap || !$lifecycle->requiresReconciliation($mapping),
+  $dependencyBootstrap
+    ? 'mapping has an explicit dependency-index reconciliation requirement'
+    : 'mapping starts without a reconciliation requirement',
+);
 $backfills = \Drupal::service('froomle_items.backfill_repository');
 $check(!$backfills->hasOpenJob(FROOMLE_MAPPING_ID), 'mapping starts without unfinished synchronization work');
 
@@ -68,20 +80,29 @@ foreach ($mappings as $index => $row) {
 }
 $check(is_int($titleIndex), 'title scalar mapping row exists');
 $currentSource = $mappings[$titleIndex]['source'];
-$candidateSource = match ($currentSource) {
-  FROOMLE_ORIGINAL_TITLE_SOURCE => FROOMLE_PROBE_TITLE_SOURCE,
-  FROOMLE_PROBE_TITLE_SOURCE => FROOMLE_ORIGINAL_TITLE_SOURCE,
-  default => throw new RuntimeException('The title mapping is neither the exact original nor the acceptance probe.'),
-};
-$direction = $candidateSource === FROOMLE_PROBE_TITLE_SOURCE ? 'temporary' : 'restore';
+if ($dependencyBootstrap) {
+  $candidateSource = $currentSource;
+  $direction = 'dependency-bootstrap';
+}
+else {
+  $candidateSource = match ($currentSource) {
+    FROOMLE_ORIGINAL_TITLE_SOURCE => FROOMLE_PROBE_TITLE_SOURCE,
+    FROOMLE_PROBE_TITLE_SOURCE => FROOMLE_ORIGINAL_TITLE_SOURCE,
+    default => throw new RuntimeException('The title mapping is neither the exact original nor the acceptance probe.'),
+  };
+  $direction = $candidateSource === FROOMLE_PROBE_TITLE_SOURCE ? 'temporary' : 'restore';
+}
 $mappings[$titleIndex]['source'] = $candidateSource;
 $candidate = clone $mapping;
 $candidate->set('mappings', $mappings);
 
 $fingerprints = \Drupal::service('froomle_items.mapping_fingerprint');
+$sameFingerprint = hash_equals($fingerprints->hash($mapping), $fingerprints->hash($candidate));
 $check(
-  !hash_equals($fingerprints->hash($mapping), $fingerprints->hash($candidate)),
-  'candidate changes the mapping fingerprint',
+  $dependencyBootstrap ? $sameFingerprint : !$sameFingerprint,
+  $dependencyBootstrap
+    ? 'dependency bootstrap keeps the exact mapping fingerprint'
+    : 'candidate changes the mapping fingerprint',
 );
 
 $syncRepository = \Drupal::service('froomle_items.sync_repository');
@@ -245,9 +266,15 @@ $handler = static function (RequestInterface $request) use (&$httpCalls): object
 \Drupal::getContainer()->set('http_client', new Client(['handler' => $handler]));
 
 $mapping->set('mappings', $mappings);
-$mapping->save();
-$check($lifecycle->requiresReconciliation($mapping), 'saved candidate requires explicit reconciliation');
-$check($httpCalls === 0, 'mapping save made no HTTP request');
+if (!$dependencyBootstrap) {
+  $mapping->save();
+  $check($lifecycle->requiresReconciliation($mapping), 'saved candidate requires explicit reconciliation');
+  $check($httpCalls === 0, 'mapping save made no HTTP request');
+}
+else {
+  $check($lifecycle->requiresReconciliation($mapping), 'dependency bootstrap remains explicitly required before enumeration');
+  $check($httpCalls === 0, 'dependency bootstrap preparation made no HTTP request');
+}
 foreach ([
   SyncRepository::QUEUE_NAME,
   SyncRepository::BACKFILL_QUEUE_NAME,
@@ -271,7 +298,7 @@ $syncProcessor = \Drupal::service('froomle_items.sync_processor');
 
 for ($page = 1; $page <= 100; $page++) {
   $wake = $enumerationQueue->claimItem(120);
-  $check(
+  $assert(
     is_object($wake)
       && is_array($wake->data)
       && (int) $wake->data['id'] === $jobId,
@@ -310,20 +337,33 @@ for ($page = 1; $page <= 100; $page++) {
     throw new RuntimeException('The reconciliation job disappeared.');
   }
   $outcomes = $backfills->outcomeCounts($jobId);
-  print sprintf(
-    "PROGRESS job=%d page=%d examined=%d scheduled=%d delivered_now=%d accepted=%d pending=%d failed=%d http_calls=%d\n",
-    $jobId,
-    $page,
-    (int) $job['examined'],
-    (int) $job['enqueued'],
-    $delivered,
-    $outcomes['accepted'],
-    $outcomes['pending'],
-    $outcomes['failed'],
-    $httpCalls,
-  );
+  if ($page % 5 === 0 || $job['status'] === 'completed') {
+    print sprintf(
+      "PROGRESS job=%d page=%d examined=%d scheduled=%d delivered_now=%d accepted=%d pending=%d failed=%d http_calls=%d\n",
+      $jobId,
+      $page,
+      (int) $job['examined'],
+      (int) $job['enqueued'],
+      $delivered,
+      $outcomes['accepted'],
+      $outcomes['pending'],
+      $outcomes['failed'],
+      $httpCalls,
+    );
+  }
   if ($job['status'] === 'completed') {
-    $check($outcomes['accepted'] === (int) $preview['count'], 'all reconciliation items are accepted');
+    $check(
+      (int) $job['selection_count'] === (int) $preview['count'],
+      'completed job retains the audited active and disabled selection count',
+    );
+    $check(
+      (int) $job['enqueued'] === $active,
+      'every active source was scheduled and already-disabled sources were not',
+    );
+    $check(
+      $outcomes['accepted'] === (int) $job['enqueued'],
+      'all scheduled reconciliation items are accepted',
+    );
     $check($outcomes['pending'] === 0 && $outcomes['retrying'] === 0 && $outcomes['failed'] === 0, 'reconciliation has no unresolved outcomes');
     break;
   }
@@ -345,4 +385,15 @@ $unsettled = (int) $database->select('froomle_items_sync', 'sync')
   ->execute()
   ->fetchField();
 $check($unsettled === 0, 'all DWARS synchronization rows are settled');
+$indexedActive = (int) $database->select('froomle_items_dependency', 'dependency')
+  ->fields('dependency', ['sync_id'])
+  ->distinct()
+  ->condition('sync_id', $database->select('froomle_items_sync', 'sync')
+    ->fields('sync', ['id'])
+    ->condition('mapping_id', FROOMLE_MAPPING_ID)
+    ->condition('desired_state', 'active'), 'IN')
+  ->countQuery()
+  ->execute()
+  ->fetchField();
+$check($indexedActive === $active, 'every active DWARS source has a resolved dependency graph');
 print "RESULT catalogue reconciliation {$direction} passed with zero HTTP requests; job={$jobId}\n";
