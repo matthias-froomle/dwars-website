@@ -102,6 +102,10 @@ if ! service_state="$(
       "dependency_repository" => \Drupal::hasService("froomle_items.dependency_repository"),
       "dependency_invalidator" => \Drupal::hasService("froomle_items.dependency_invalidator"),
       "dependency_table" => \Drupal::database()->schema()->tableExists("froomle_items_dependency"),
+      "mapping_retirement" => \Drupal::hasService("froomle_items.mapping_retirement"),
+      "retirement_table" => \Drupal::database()->schema()->tableExists("froomle_items_retirement"),
+      "uninstall_validator" => \Drupal::hasService("froomle_items.uninstall_validator"),
+      "retirement_form" => \Drupal::entityTypeManager()->getDefinition("froomle_item_mapping")->getFormClass("delete") === \Drupal\froomle_items\Form\ItemMappingRetirementForm::class,
       "editorial_queue_worker" => isset($definitions["froomle_items_sync"]),
       "backfill_queue_worker" => isset($definitions["froomle_items_backfill_sync"]),
       "automatic_delivery" => \Drupal::config("froomle_items.settings")->get("automatic_delivery") === TRUE,
@@ -115,7 +119,7 @@ if ! service_state="$(
   failed=1
 fi
 
-for service_check in automatic_sync_subscriber backfill_batch_runner dependency_repository dependency_invalidator dependency_table editorial_queue_worker backfill_queue_worker automatic_delivery; do
+for service_check in automatic_sync_subscriber backfill_batch_runner dependency_repository dependency_invalidator dependency_table mapping_retirement retirement_table uninstall_validator retirement_form editorial_queue_worker backfill_queue_worker automatic_delivery; do
   if grep -qx "$service_check=1" <<<"$service_state"; then
     echo "PASS active Drupal container: $service_check"
   else
@@ -193,16 +197,24 @@ if ! queue_state="$(
         FROM froomle_items_backfill_item item
         INNER JOIN froomle_items_sync sync ON sync.id = item.sync_id
         WHERE sync.generation <> sync.accepted_generation
-      );
+      ),
+      (SELECT COUNT(*) FROM froomle_items_retirement);
   "
 )"; then
   echo "FAIL could not inspect Drupal queue state" >&2
   failed=1
-  queue_state="-1 -1 -1 -1 -1 -1 -1 -1"
+  queue_state="-1 -1 -1 -1 -1 -1 -1 -1 -1"
 fi
-read -r editorial_queue backfill_queue enumeration_queue pending_rows expected_rows backfill_jobs blocking_backfill_jobs unresolved_backfill_items <<<"$queue_state"
+read -r editorial_queue backfill_queue enumeration_queue pending_rows expected_rows backfill_jobs blocking_backfill_jobs unresolved_backfill_items retirement_decisions <<<"$queue_state"
 
-echo "STATE editorial_queue=$editorial_queue backfill_queue=$backfill_queue enumeration_queue=$enumeration_queue pending_rows=$pending_rows backfill_jobs=$backfill_jobs blocking_backfill_jobs=$blocking_backfill_jobs unresolved_backfill_items=$unresolved_backfill_items"
+echo "STATE editorial_queue=$editorial_queue backfill_queue=$backfill_queue enumeration_queue=$enumeration_queue pending_rows=$pending_rows backfill_jobs=$backfill_jobs blocking_backfill_jobs=$blocking_backfill_jobs unresolved_backfill_items=$unresolved_backfill_items retirement_decisions=$retirement_decisions"
+
+if [[ "$retirement_decisions" != "0" ]]; then
+  echo "FAIL a mapping retirement decision is active" >&2
+  failed=1
+else
+  echo "PASS no mapping retirement is active"
+fi
 
 if [[ "$backfill_queue" != "0" || "$blocking_backfill_jobs" != "0" || "$unresolved_backfill_items" != "0" ]]; then
   echo "FAIL unfinished backfill work exists" >&2
