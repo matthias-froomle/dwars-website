@@ -79,6 +79,40 @@ recovery wake-ups, but blocks unfinished jobs, unresolved job items, pending
 delivery work, undeclared editorial work, package drift and Drupal database
 updates. It never processes a queue or calls Froomle.
 
+After the gate reports `READY`, exercise the installed mapping-lifecycle
+contract without contacting Froomle:
+
+```bash
+ddev drush php:script /var/www/html/scripts/test-froomle-items-mapping-lifecycle.php
+```
+
+The acceptance script replaces Drupal's HTTP client in that Drush process,
+uses isolated temporary taxonomy content, claims only the exact queue records
+it creates, and removes its mapping, content, jobs, state and mock OAuth token
+on exit. It verifies identity locking, policy-only saves, explicit previewed
+reconciliation, changed-payload upserts and stale-item disables.
+
+For a deliberate catalogue-scale no-op test against the restored DWARS data,
+first run the read-only payload/operation preflight:
+
+```bash
+ddev drush php:script /var/www/html/scripts/test-froomle-items-real-catalogue-reconciliation.php
+```
+
+Only when it reports `PRECHECK READY` with zero planned operation items, apply
+one direction under its fail-closed HTTP handler:
+
+```bash
+ddev exec env FROOMLE_NOOP_APPLY=1 drush php:script /var/www/html/scripts/test-froomle-items-real-catalogue-reconciliation.php
+```
+
+Run the preflight and applied command a second time to restore the exact
+original mapping, then require the readiness gate to report `READY`. The test
+uses an impossible fallback before `title.value`, processes the real catalogue
+through reconciliation, and fails if any OAuth or Items HTTP request is
+attempted. It advances local generations and leaves completed job history, but
+must not change accepted payloads or remote state.
+
 ## Next.js visual prototype
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with
